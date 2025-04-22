@@ -167,6 +167,23 @@ class LoginActivity : AppCompatActivity() {
                 userManager.setLoggedIn(true)
                 userManager.saveUserEmail(email)
 
+                // Get the username and save it to user_profile SharedPreferences
+                val userName = userManager.getCurrentUserName()
+                if (!userName.isNullOrEmpty()) {
+                    // Save the username to user_profile for MainActivity to find
+                    getSharedPreferences("user_profile", MODE_PRIVATE)
+                        .edit()
+                        .putString("name", userName)
+                        .apply()
+                } else {
+                    // If no name found, use email username part
+                    val emailUsername = email.substringBefore("@")
+                    getSharedPreferences("user_profile", MODE_PRIVATE)
+                        .edit()
+                        .putString("name", emailUsername)
+                        .apply()
+                }
+
                 // Launch main activity
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()

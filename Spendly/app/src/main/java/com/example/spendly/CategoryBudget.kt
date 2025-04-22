@@ -5,9 +5,11 @@ data class CategoryBudget(
     val budget: Double,
     val spent: Double
 ) {
-    val percentage: Int
-        get() = if (budget > 0) (spent / budget * 100).toInt().coerceIn(0, 100) else 0
+    fun getPercentSpent(): Int {
+        return if (budget > 0) ((spent / budget) * 100).toInt().coerceIn(0, 100) else 0
+    }
 
-    val remaining: Double
-        get() = (budget - spent).coerceAtLeast(0.0)
+    fun getRemaining(): Double {
+        return (budget - spent).coerceAtLeast(0.0)
+    }
 }

@@ -97,7 +97,9 @@ class UserManager(context: Context) {
      * Gets the logged in status
      */
     fun isLoggedIn(): Boolean {
-        return sharedPreferences.getBoolean("is_logged_in", false)
+        val isLoggedInFlag = sharedPreferences.getBoolean("is_logged_in", false)
+        val hasEmail = !getCurrentUserEmail().isNullOrEmpty()
+        return isLoggedInFlag && hasEmail
     }
 
     /**

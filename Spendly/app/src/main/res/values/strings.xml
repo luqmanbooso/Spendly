@@ -21,4 +21,27 @@
         <item>Allowance</item>
         <item>Other</item>
     </string-array>
+
+
+    <string-array name="currency_entries">
+        <item>US Dollar ($)</item>
+        <item>Euro (€)</item>
+        <item>British Pound (£)</item>
+        <item>Sri Lankan Rupee (Rs)</item>
+        <item>Indian Rupee (₹)</item>
+        <item>Japanese Yen (¥)</item>
+        <item>Canadian Dollar (C$)</item>
+        <item>Australian Dollar (A$)</item>
+    </string-array>
+
+    <string-array name="currency_values">
+        <item>USD</item>
+        <item>EUR</item>
+        <item>GBP</item>
+        <item>LKR</item>
+        <item>INR</item>
+        <item>JPY</item>
+        <item>CAD</item>
+        <item>AUD</item>
+    </string-array>
 </resources>

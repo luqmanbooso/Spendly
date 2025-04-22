@@ -1,9 +1,12 @@
 package com.example.spendly
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.spendly.TransactionAdapter
@@ -12,6 +15,7 @@ import com.example.spendly.TransactionRepository
 import com.example.spendly.databinding.ActivityMainBinding
 import com.example.spendly.Transaction
 import com.example.spendly.CurrencyFormatter
+import com.example.spendly.AddTransactionActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,7 +25,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prefsManager: PrefsManager
     private lateinit var transactionRepository: TransactionRepository
     private lateinit var bottomNavHelper: BottomNavHelper
-
+    private lateinit var btnSettings: ImageView
+    private lateinit var tvUserName : TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,10 +38,13 @@ class MainActivity : AppCompatActivity() {
         prefsManager = PrefsManager(this)
         transactionRepository = TransactionRepository(this)
         bottomNavHelper = BottomNavHelper(this, binding.root)
-
-
+        btnSettings = findViewById(R.id.btnSettings)
         bottomNavHelper.setupBottomNav(NavSection.HOME)
+        tvUserName = findViewById(R.id.tvUserName) // Added user name TextView
 
+        btnSettings.setOnClickListener {
+            openSettings()
+        }
 
         // Set the current month in the header
         val monthFormatter = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
@@ -55,6 +63,12 @@ class MainActivity : AppCompatActivity() {
         setupRecentTransactions()
     }
 
+
+    private fun openSettings() {
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivity(intent)
+    }
+
     private fun setupDashboard() {
         val currencySymbol = prefsManager.getCurrencySymbol()
 
@@ -62,6 +76,8 @@ class MainActivity : AppCompatActivity() {
         val totalIncome = transactionRepository.getTotalIncomeForCurrentMonth()
         val totalExpense = transactionRepository.getTotalExpenseForCurrentMonth()
         val balance = totalIncome - totalExpense
+
+        updateUserName()
 
         binding.tvTotalIncome.text = CurrencyFormatter.formatAmount(totalIncome, currencySymbol)
         binding.tvTotalExpense.text = CurrencyFormatter.formatAmount(totalExpense, currencySymbol)
@@ -104,6 +120,42 @@ class MainActivity : AppCompatActivity() {
         binding.progressBudget.progressTintList = ColorStateList.valueOf(getColor(colorId))
     }
 
+
+    private fun updateUserName() {
+        // First try user_profile SharedPreferences (which we set during login)
+        val sharedPrefs = getSharedPreferences("user_profile", Context.MODE_PRIVATE)
+        val userName = sharedPrefs.getString("name", "")
+
+        if (!userName.isNullOrEmpty()) {
+            tvUserName.text = userName
+        } else {
+            // If not found, try directly via UserManager as backup
+            val userManager = UserManager(this)
+            val userNameFromManager = userManager.getCurrentUserName()
+
+            if (!userNameFromManager.isNullOrEmpty()) {
+                // Found name in UserManager, save it to user_profile for next time
+                tvUserName.text = userNameFromManager
+                sharedPrefs.edit().putString("name", userNameFromManager).apply()
+            } else {
+                // If still no name found, use email if available
+                val email = userManager.getCurrentUserEmail()
+                if (!email.isNullOrEmpty()) {
+                    val emailUsername = email.substringBefore("@")
+                    tvUserName.text = emailUsername
+                    sharedPrefs.edit().putString("name", emailUsername).apply()
+                } else {
+                    // Last resort fallback
+                    tvUserName.text = "User"
+                }
+            }
+        }
+
+        // Update the current date
+        val dateFormat = SimpleDateFormat("EEEE, dd MMM yyyy", Locale.getDefault())
+        val currentDate = dateFormat.format(Date())
+        binding.tvCurrentDate.text = currentDate
+    }
     private fun setupRecentTransactions() {
         val recentTransactions = transactionRepository.getRecentTransactions(5)
 
@@ -119,20 +171,19 @@ class MainActivity : AppCompatActivity() {
                 recentTransactions,
                 prefsManager.getCurrencySymbol()
             ) { transaction ->
-                // Handle transaction click
-//                val intent = Intent(this, AddTransactionActivity::class.java).apply {
-//                    putExtra("TRANSACTION_ID", transaction.id)
-//                }
+                val intent = Intent(this, AddTransactionActivity::class.java).apply {
+                    putExtra("TRANSACTION_ID", transaction.id)
+                }
                 startActivity(intent)
             }
 
             binding.rvRecentTransactions.adapter = adapter
         }
 
-//        binding.btnViewAllTransactions.setOnClickListener {
-//            // Navigate to transactions screen
-//            startActivity(Intent(this, TransactionsActivity::class.java))
-//        }
+        binding.btnViewAllTransactions.setOnClickListener {
+            // Navigate to transactions screen
+            startActivity(Intent(this, TransactionActivity::class.java))
+        }
     }
 
 

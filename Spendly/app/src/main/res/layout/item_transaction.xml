@@ -2,102 +2,62 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/cardTransaction"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
-    android:stateListAnimator="@animator/card_click_anim"
+    android:layout_marginBottom="8dp"
     app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="16dp"
-    app:cardElevation="3dp">
+    app:cardElevation="2dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:padding="16dp">
 
         <!-- Category Icon -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/iconBackground"
+            android:id="@+id/cardCategoryIcon"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            app:cardBackgroundColor="@color/category_food"
+            app:cardBackgroundColor="@color/category_other"
             app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:cardElevation="0dp">
 
             <ImageView
-                android:id="@+id/imgCategory"
+                android:id="@+id/imgCategoryIcon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_category_food"
-                app:tint="@color/white" />
+                app:tint="@color/white"
+                tools:src="@drawable/ic_category_other" />
         </androidx.cardview.widget.CardView>
 
         <!-- Transaction Details -->
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/poppins_medium"
-            android:maxLines="1"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toStartOf="@+id/tvAmount"
-            app:layout_constraintStart_toEndOf="@+id/iconBackground"
-            app:layout_constraintTop_toTopOf="@+id/iconBackground"
-            tools:text="Grocery Shopping" />
-
         <LinearLayout
-            android:id="@+id/categoryDateContainer"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="@+id/iconBackground"
-            app:layout_constraintEnd_toStartOf="@+id/tvAmount"
-            app:layout_constraintStart_toEndOf="@+id/iconBackground"
-            app:layout_constraintTop_toBottomOf="@+id/tvTitle">
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tvCategory"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/category_tag_background"
-                android:fontFamily="@font/poppins"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="2dp"
-                android:textColor="@color/white"
-                android:textSize="10sp"
-                tools:text="Food" />
+                android:fontFamily="@font/poppins_medium"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                tools:text="Grocery Shopping" />
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:text="•"
-                android:textColor="@color/text_secondary"
-                android:textSize="10sp" />
-
-            <TextView
-                android:id="@+id/tvDate"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvCategoryName"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/poppins"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp"
-                tools:text="20 Apr 2025" />
+                tools:text="Food • April 22, 2025" />
         </LinearLayout>
 
         <!-- Amount -->
@@ -105,13 +65,11 @@
             android:id="@+id/tvAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_semibold"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/poppins_medium"
             android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="-$45.50"
+            tools:text="-$45.99"
             tools:textColor="@color/expense" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

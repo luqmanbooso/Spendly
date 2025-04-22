@@ -1,43 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="bottom"
-    app:cardElevation="8dp">
+    android:layout_gravity="bottom">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <androidx.cardview.widget.CardView
+        android:id="@+id/bottomNavCard"
+        android:layout_width="417dp"
+        android:layout_height="70dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardElevation="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <!-- Use a custom background to get top-only rounded corners -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:gravity="center"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            android:background="@drawable/nav_background" />
 
-            <RelativeLayout
-                android:id="@+id/nav_home"
+        <!-- Main navigation container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp">
+
+            <!-- Left side navigation items container -->
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toStartOf="@+id/guideline_center_left"
+                app:layout_constraintStart_toStartOf="parent">
 
+                <!-- Home -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
+                    android:id="@+id/nav_home"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
 
                     <ImageView
                         android:id="@+id/icon_home"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_home"
-                        android:tint="@color/primary" />
+                        app:tint="@color/text_secondary" />
 
                     <TextView
                         android:id="@+id/text_home"
@@ -45,33 +60,27 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins"
                         android:text="Home"
-                        android:textColor="@color/primary"
+                        android:textColor="@color/text_secondary"
                         android:textSize="10sp" />
                 </LinearLayout>
-            </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/nav_transactions"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
+                <!-- Transactions -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
+                    android:id="@+id/nav_transactions"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
 
                     <ImageView
                         android:id="@+id/icon_transactions"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_transactions"
-                        android:tint="@color/icon_inactive" />
+                        app:tint="@color/text_secondary" />
 
                     <TextView
                         android:id="@+id/text_transactions"
@@ -82,37 +91,33 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="10sp" />
                 </LinearLayout>
-            </RelativeLayout>
+            </LinearLayout>
 
-            <!-- Center placeholder for FAB -->
-            <RelativeLayout
+            <!-- Right side navigation items container -->
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
-            </RelativeLayout>
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/guideline_center_right">
 
-            <RelativeLayout
-                android:id="@+id/nav_budget"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
+                <!-- Budget -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
+                    android:id="@+id/nav_budget"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
 
                     <ImageView
                         android:id="@+id/icon_budget"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_budget"
-                        android:tint="@color/icon_inactive" />
+                        app:tint="@color/text_secondary" />
 
                     <TextView
                         android:id="@+id/text_budget"
@@ -123,30 +128,24 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="10sp" />
                 </LinearLayout>
-            </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/nav_analysis"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackgroundBorderless">
-
+                <!-- Analysis -->
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
+                    android:id="@+id/nav_analysis"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
 
                     <ImageView
                         android:id="@+id/icon_analysis"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:src="@drawable/ic_analysis"
-                        android:tint="@color/icon_inactive" />
+                        app:tint="@color/text_secondary" />
 
                     <TextView
                         android:id="@+id/text_analysis"
@@ -157,23 +156,50 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="10sp" />
                 </LinearLayout>
-            </RelativeLayout>
-        </LinearLayout>
+            </LinearLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_add_transaction"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="-28dp"
-            android:backgroundTint="@color/primary"
-            android:contentDescription="Add Transaction"
-            android:elevation="12dp"
-            android:src="@drawable/ic_add"
-            app:borderWidth="0dp"
-            app:fabCustomSize="56dp"
-            app:maxImageSize="24dp"
-            app:tint="@color/white" />
-    </RelativeLayout>
-</com.google.android.material.card.MaterialCardView>
+            <!-- Center guidelines for positioning -->
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_center_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.4" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_center_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.6" />
+
+            <!-- Add Transaction button with perfect centering -->
+            <FrameLayout
+                android:id="@+id/nav_add_transaction"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:elevation="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/guideline_center_right"
+                app:layout_constraintStart_toEndOf="@+id/guideline_center_left"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:cardBackgroundColor="@color/primary_dark"
+                    app:cardCornerRadius="28dp"
+                    app:cardElevation="4dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_add"
+                        app:tint="@color/white" />
+                </androidx.cardview.widget.CardView>
+            </FrameLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -53,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
         android:layout_marginBottom="32dp"
-        android:backgroundTint="@color/primary"
+        android:backgroundTint="@color/primary_dark"
         android:fontFamily="@font/poppins"
         android:paddingVertical="12dp"
         android:text="Continue"

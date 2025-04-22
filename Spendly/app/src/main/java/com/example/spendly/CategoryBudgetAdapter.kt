@@ -3,120 +3,86 @@ package com.example.spendly
 import android.content.Context
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.spendly.R
-import com.example.spendly.CategoryBudget
-import com.example.spendly.databinding.ItemCategoryBudgetBinding
-import com.example.spendly.CurrencyFormatter
 
 class CategoryBudgetAdapter(
     private val context: Context,
-    private val categoryBudgets: List<CategoryBudget>,
+    private val items: List<CategoryBudget>,
     private val currencySymbol: String,
-    private val onEditClick: (CategoryBudget) -> Unit
+    private val onClick: (CategoryBudget) -> Unit
 ) : RecyclerView.Adapter<CategoryBudgetAdapter.ViewHolder>() {
 
-    class ViewHolder(val binding: ItemCategoryBudgetBinding) : RecyclerView.ViewHolder(binding.root)
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemCategoryBudgetBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
-        return ViewHolder(binding)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_category_budget, parent, false)
+        return ViewHolder(view)
     }
-
-    override fun getItemCount(): Int = categoryBudgets.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val categoryBudget = categoryBudgets[position]
-        val binding = holder.binding
+        val item = items[position]
 
-        // Apply entrance animation
-        val animation = AnimationUtils.loadAnimation(context, R.anim.fade_slide_in)
-        holder.itemView.startAnimation(animation)
+        holder.tvCategory.text = item.category.capitalize()
+        holder.tvBudget.text = CurrencyFormatter.formatAmount(item.budget, currencySymbol)
+        holder.tvSpent.text = "${CurrencyFormatter.formatAmount(item.spent, currencySymbol)} spent"
+        holder.tvRemaining.text = "${CurrencyFormatter.formatAmount(item.getRemaining(), currencySymbol)} left"
 
-        // Set category name
-        binding.tvCategoryName.text = categoryBudget.category
+        val percentSpent = item.getPercentSpent()
+        holder.progressBar.progress = percentSpent
 
-        // Set budget amounts
-        val formattedBudget = CurrencyFormatter.formatAmount(categoryBudget.budget, currencySymbol)
-        binding.tvBudgetAmount.text = formattedBudget
-
-        val formattedSpent = CurrencyFormatter.formatAmount(categoryBudget.spent, currencySymbol)
-        binding.tvBudgetSpent.text = "$formattedSpent spent"
-
-        // Set remaining and percentage
-        binding.tvBudgetPercentage.text = "${categoryBudget.percentage}% used"
-
-        val formattedRemaining = CurrencyFormatter.formatAmount(categoryBudget.remaining, currencySymbol)
-        binding.tvRemaining.text = "$formattedRemaining left"
-
-        // Set progress bar
-        binding.progressCategoryBudget.progress = categoryBudget.percentage
-
-        // Set color based on usage
-        val colorResId = when {
-            categoryBudget.percentage >= 100 -> R.color.expense
-            categoryBudget.percentage >= 80 -> R.color.warning
+        // Set progress color based on percentage spent
+        val colorRes = when {
+            percentSpent >= 90 -> R.color.expense
+            percentSpent >= 70 -> R.color.warning
             else -> R.color.success
         }
-        val color = ContextCompat.getColor(context, colorResId)
-        binding.progressCategoryBudget.progressTintList = ColorStateList.valueOf(color)
+        holder.progressBar.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(context, colorRes))
 
-        // Set category icon and background
-        val categoryIconResId = getCategoryIconResId(categoryBudget.category)
-        binding.categoryIcon.setImageResource(categoryIconResId)
+        // Set category icon and color
+        setIconAndColor(holder, item.category)
 
-        val categoryColor = getCategoryColorResId(categoryBudget.category)
-        binding.categoryIconCard.setCardBackgroundColor(ContextCompat.getColor(context, categoryColor))
-
-        // Set edit click listener
-        binding.btnEdit.setOnClickListener {
-            // Add animation when clicked
-            val clickAnim = AnimationUtils.loadAnimation(context, R.anim.click_animation)
-            binding.btnEdit.startAnimation(clickAnim)
-
-            onEditClick(categoryBudget)
-        }
-
-        // Set card click listener
-        binding.root.setOnClickListener { onEditClick(categoryBudget) }
+        // Set click listener
+        holder.itemView.setOnClickListener { onClick(item) }
     }
 
-    private fun getCategoryIconResId(category: String): Int {
-        return when (category.lowercase()) {
-            "food" -> R.drawable.ic_category_food
-            "transport" -> R.drawable.ic_category_transport
-            "bills" -> R.drawable.ic_category_bills
-            "entertainment" -> R.drawable.ic_category_entertainment
-            "shopping" -> R.drawable.ic_category_shopping
-            "health" -> R.drawable.ic_category_health
-            "education" -> R.drawable.ic_category_education
-            else -> R.drawable.ic_category_other
+    private fun setIconAndColor(holder: ViewHolder, category: String) {
+        val (iconRes, colorRes) = when (category.lowercase()) {
+            "food" -> Pair(R.drawable.ic_category_food, R.color.category_food)
+            "transport" -> Pair(R.drawable.ic_category_transport, R.color.category_transport)
+            "bills" -> Pair(R.drawable.ic_category_bills, R.color.category_bills)
+            "entertainment" -> Pair(R.drawable.ic_category_entertainment, R.color.category_entertainment)
+            "shopping" -> Pair(R.drawable.ic_category_shopping, R.color.category_shopping)
+            "health" -> Pair(R.drawable.ic_category_health, R.color.category_health)
+            "education" -> Pair(R.drawable.ic_category_education, R.color.category_education)
+            else -> Pair(R.drawable.ic_category_other, R.color.category_other)
         }
+
+        holder.ivIcon.setImageResource(iconRes)
+        holder.ivIcon.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(context, colorRes))
     }
 
-    private fun getCategoryColorResId(category: String): Int {
-        return when (category.lowercase()) {
-            "food" -> R.color.category_food
-            "transport" -> R.color.category_transport
-            "bills" -> R.color.category_bills
-            "entertainment" -> R.color.category_entertainment
-            "shopping" -> R.color.category_shopping
-            "health" -> R.color.category_health
-            "education" -> R.color.category_education
-            else -> R.color.category_other
-        }
-    }
+    override fun getItemCount() = items.size
 
-    // Clear all animations when recycled
-    override fun onViewRecycled(holder: ViewHolder) {
-        super.onViewRecycled(holder)
-        holder.itemView.clearAnimation()
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val ivIcon: ImageView = view.findViewById(R.id.ivCategoryIcon)
+        val tvCategory: TextView = view.findViewById(R.id.tvCategoryName)
+        val tvBudget: TextView = view.findViewById(R.id.tvBudget)
+        val tvSpent: TextView = view.findViewById(R.id.tvSpent)
+        val tvRemaining: TextView = view.findViewById(R.id.tvRemaining)
+        val progressBar: ProgressBar = view.findViewById(R.id.progressBar)
+    }
+}
+
+// Extension function to capitalize the first letter of a string
+fun String.capitalize(): String {
+    return if (isNotEmpty()) {
+        this[0].uppercase() + substring(1)
+    } else {
+        this
     }
 }

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="Profile Settings">
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="profile"
+            app:summary="Edit your name, email and profile picture"
+            app:title="Edit Profile" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="Budget &amp; Notifications">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:key="budget_alerts"
+            app:summary="Get notified when you approach your monthly budget limit"
+            app:title="Budget Alert Notifications" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:iconSpaceReserved="false"
+            app:key="daily_reminder"
+            app:summary="Get daily reminders to record your expenses"
+            app:title="Daily Expense Reminders" />
+
+        <EditTextPreference
+            app:defaultValue="80"
+            app:iconSpaceReserved="false"
+            app:key="budget_warning_percent"
+            app:summary="Percentage of budget to trigger warning (between 50-90)"
+            app:title="Budget Warning Threshold (%)"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="Currency Settings">
+
+        <ListPreference
+            app:defaultValue="USD"
+            app:entries="@array/currency_entries"
+            app:entryValues="@array/currency_values"
+            app:iconSpaceReserved="false"
+            app:key="default_currency"
+            app:summary="Set your preferred currency for transactions"
+            app:title="Default Currency"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="Data Management">
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="backup_data"
+            app:summary="Save your transactions and settings to a file"
+            app:title="Backup Data" />
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="restore_data"
+            app:summary="Restore your transactions from a backup"
+            app:title="Restore Data" />
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="export_transactions"
+            app:summary="Export your transactions as CSV file"
+            app:title="Export Transactions" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="Account">
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="logout"
+            app:summary="Sign out from your account"
+            app:title="Logout" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

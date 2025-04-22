@@ -1,83 +1,86 @@
-package com.example.spendly.adapter
+package com.example.spendly
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.spendly.R
-import com.example.spendly.databinding.ItemCategoryExpenseBinding
-import com.example.spendly.model.CategoryExpense
-import com.example.spendly.utils.CurrencyFormatter
 
 class CategoryExpenseAdapter(
     private val context: Context,
-    private val categoryExpenses: List<CategoryExpense>,
+    private val items: List<CategoryExpense>,
     private val currencySymbol: String
 ) : RecyclerView.Adapter<CategoryExpenseAdapter.ViewHolder>() {
 
-    class ViewHolder(val binding: ItemCategoryExpenseBinding) : RecyclerView.ViewHolder(binding.root)
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemCategoryExpenseBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
-        return ViewHolder(binding)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_category_expense, parent, false)
+        return ViewHolder(view)
     }
-
-    override fun getItemCount(): Int = categoryExpenses.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val categoryExpense = categoryExpenses[position]
-        val binding = holder.binding
+        val item = items[position]
 
-        // Set category name
-        binding.categoryName.text = categoryExpense.category
+        holder.tvCategory.text = item.category
+        holder.tvAmount.text = CurrencyFormatter.formatAmount(item.amount, currencySymbol)
+        holder.tvPercentage.text = String.format("%.1f%%", item.percentage)
 
-        // Set amount
-        binding.tvAmount.text = CurrencyFormatter.formatAmount(categoryExpense.amount, currencySymbol)
+        // Set progress bar
+        holder.progressBar.progress = item.percentage.toInt()
 
-        // Set percentage
-        binding.tvPercentage.text = "${categoryExpense.percentage.toInt()}%"
+        // Set icon and color based on category
+        when (item.category.lowercase()) {
+            "food" -> {
+                holder.ivIcon.setImageResource(R.drawable.ic_category_food)
+                setItemColor(holder, R.color.category_food)
+            }
+            "transport" -> {
+                holder.ivIcon.setImageResource(R.drawable.ic_category_transport)
+                setItemColor(holder, R.color.category_transport)
+            }
+            "bills" -> {
+                holder.ivIcon.setImageResource(R.drawable.ic_category_bills)
+                setItemColor(holder, R.color.category_bills)
+            }
+            "entertainment" -> {
+                holder.ivIcon.setImageResource(R.drawable.ic_category_entertainment)
+                setItemColor(holder, R.color.category_entertainment)
+            }
+            "shopping" -> {
+                holder.ivIcon.setImageResource(R.drawable.ic_category_shopping)
+                setItemColor(holder, R.color.category_shopping)
+            }
+            "health" -> {
+                holder.ivIcon.setImageResource(R.drawable.ic_category_health)
+                setItemColor(holder, R.color.category_health)
+            }
+            "education" -> {
+                holder.ivIcon.setImageResource(R.drawable.ic_category_education)
+                setItemColor(holder, R.color.category_education)
+            }
+            else -> {
+                holder.ivIcon.setImageResource(R.drawable.ic_category_other)
+                setItemColor(holder, R.color.category_other)
+            }
+        }
+    }
 
-        // Set progress
-        binding.progressCategory.progress = categoryExpense.percentage.toInt()
-
-        // Set category icon and colors
-        val colorResId = getCategoryColorResId(categoryExpense.category)
+    private fun setItemColor(holder: ViewHolder, colorResId: Int) {
         val color = ContextCompat.getColor(context, colorResId)
-
-        binding.categoryIconCard.setCardBackgroundColor(color)
-        binding.progressCategory.progressTintList = ColorStateList.valueOf(color)
-        binding.categoryIcon.setImageResource(getCategoryIconResId(categoryExpense.category))
+        holder.progressBar.progressTintList = ContextCompat.getColorStateList(context, colorResId)
     }
 
-    private fun getCategoryColorResId(category: String): Int {
-        return when (category.lowercase()) {
-            "food" -> R.color.category_food
-            "transport" -> R.color.category_transport
-            "bills" -> R.color.category_bills
-            "entertainment" -> R.color.category_entertainment
-            "shopping" -> R.color.category_shopping
-            "health" -> R.color.category_health
-            "education" -> R.color.category_education
-            else -> R.color.category_other
-        }
-    }
+    override fun getItemCount() = items.size
 
-    private fun getCategoryIconResId(category: String): Int {
-        return when (category.lowercase()) {
-            "food" -> R.drawable.ic_category_food
-            "transport" -> R.drawable.ic_category_transport
-            "bills" -> R.drawable.ic_category_bills
-            "entertainment" -> R.drawable.ic_category_entertainment
-            "shopping" -> R.drawable.ic_category_shopping
-            "health" -> R.drawable.ic_category_health
-            "education" -> R.drawable.ic_category_education
-            else -> R.drawable.ic_category_other
-        }
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val ivIcon: ImageView = view.findViewById(R.id.imgCategoryIcon) // Changed from ivCategoryIcon
+        val tvCategory: TextView = view.findViewById(R.id.tvCategoryName)
+        val tvAmount: TextView = view.findViewById(R.id.tvAmount) // Changed from tvCategoryAmount
+        val tvPercentage: TextView = view.findViewById(R.id.tvPercentage)
+        val progressBar: ProgressBar = view.findViewById(R.id.progressBar) // Changed from progressBarCategory
     }
 }

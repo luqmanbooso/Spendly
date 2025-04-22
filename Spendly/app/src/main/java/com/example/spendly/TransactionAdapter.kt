@@ -1,98 +1,130 @@
 package com.example.spendly
 
-import android.content.res.ColorStateList
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.example.spendly.R
-import com.example.spendly.databinding.ItemTransactionBinding
-import com.example.spendly.Transaction
-import com.example.spendly.TransactionType
-import com.example.spendly.CurrencyFormatter
 import java.text.SimpleDateFormat
 import java.util.*
 
 class TransactionAdapter(
     private val transactions: List<Transaction>,
     private val currencySymbol: String,
-    private val onTransactionClick: (Transaction) -> Unit
+    private val onItemClick: (Transaction) -> Unit
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
-    class TransactionViewHolder(val binding: ItemTransactionBinding) : RecyclerView.ViewHolder(binding.root)
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
-        val binding = ItemTransactionBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
-        return TransactionViewHolder(binding)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_transaction, parent, false)
+        return TransactionViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) {
         val transaction = transactions[position]
-        val binding = holder.binding
-        val context = binding.root.context
+        holder.bind(transaction, currencySymbol)
 
-        // Set title and category
-        binding.tvTitle.text = transaction.title
-        binding.tvCategory.text = transaction.category
-
-        // Format date
-        val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-        val formattedDate = dateFormat.format(Date(transaction.date))
-        binding.tvDate.text = formattedDate
-
-        // Set amount with proper formatting and color
-        val amountPrefix = if (transaction.type == TransactionType.EXPENSE) "- " else "+ "
-        val amountColor = if (transaction.type == TransactionType.EXPENSE)
-            context.getColor(R.color.expense) else context.getColor(R.color.success)
-
-        binding.tvAmount.text = amountPrefix + CurrencyFormatter.formatAmount(
-            transaction.amount, currencySymbol
-        )
-        binding.tvAmount.setTextColor(amountColor)
-
-        // Set category icon background color
-        val bgColor = if (transaction.type == TransactionType.EXPENSE)
-            context.getColor(R.color.expense) else context.getColor(R.color.success)
-        binding.imgCategory.backgroundTintList = ColorStateList.valueOf(bgColor)
-
-        // Set category icon
-        val iconResId = getCategoryIcon(transaction.category, transaction.type)
-        binding.imgCategory.setImageResource(iconResId)
-
-        // Set click listener
-        binding.root.setOnClickListener {
-            onTransactionClick(transaction)
+        holder.itemView.setOnClickListener {
+            onItemClick(transaction)
         }
     }
 
-    private fun getCategoryIcon(category: String, type: TransactionType): Int {
-        return when {
-            type == TransactionType.INCOME -> {
-                when (category.lowercase()) {
-                    "salary" -> R.drawable.ic_category_salary
-                    "business" -> R.drawable.ic_category_business
-                    "investment" -> R.drawable.ic_category_investment
+    override fun getItemCount() = transactions.size
+
+    class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val cardCategoryIcon: CardView = itemView.findViewById(R.id.cardCategoryIcon)
+        private val imgCategoryIcon: ImageView = itemView.findViewById(R.id.imgCategoryIcon)
+        private val tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
+        private val tvDescription: TextView = itemView.findViewById(R.id.tvCategoryName)
+        private val tvAmount: TextView = itemView.findViewById(R.id.tvAmount)
+
+        fun bind(transaction: Transaction, currencySymbol: String) {
+            // Set title
+            tvTitle.text = transaction.title
+
+            // Format date
+            val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+            val formattedDate = dateFormat.format(Date(transaction.date))
+
+            // Set description (category and date)
+            tvDescription.text = "${transaction.category} • $formattedDate"
+
+            // Set amount with appropriate format
+            val context = itemView.context
+            val amountStr = if (!transaction.isIncome) {
+                "-${CurrencyFormatter.formatAmount(transaction.amount, currencySymbol)}"
+            } else {
+                "+${CurrencyFormatter.formatAmount(transaction.amount, currencySymbol)}"
+            }
+            tvAmount.text = amountStr
+
+            // Set text color based on transaction type (using isIncome for consistency)
+            val amountColor = if (!transaction.isIncome) {
+                ContextCompat.getColor(context, R.color.expense)
+            } else {
+                ContextCompat.getColor(context, R.color.success)
+            }
+            tvAmount.setTextColor(amountColor)
+
+            // Set category icon and background (using isIncome for consistency)
+            val iconResId = getCategoryIconResource(transaction.category, transaction.isIncome)
+            imgCategoryIcon.setImageResource(iconResId)
+
+            val categoryColorResId = getCategoryColorResource(transaction.category, transaction.isIncome)
+            cardCategoryIcon.setCardBackgroundColor(ContextCompat.getColor(context, categoryColorResId))
+        }
+
+        private fun getCategoryIconResource(category: String, isIncome: Boolean): Int {
+            return when {
+                isIncome -> {
+                    when (category.lowercase()) {
+                        "salary" -> R.drawable.ic_category_salary
+                        "business" -> R.drawable.ic_category_business
+                        "investment" -> R.drawable.ic_category_investment
                         else -> R.drawable.ic_category_other_income
+                    }
+                }
+                else -> {
+                    when (category.lowercase()) {
+                        "food" -> R.drawable.ic_category_food
+                        "transport" -> R.drawable.ic_category_transport
+                        "bills" -> R.drawable.ic_category_bills
+                        "entertainment" -> R.drawable.ic_category_entertainment
+                        "shopping" -> R.drawable.ic_category_shopping
+                        "health" -> R.drawable.ic_category_health
+                        "education" -> R.drawable.ic_category_education
+                        else -> R.drawable.ic_category_other
+                    }
                 }
             }
-            else -> {
-                when (category.lowercase()) {
-                    "food" -> R.drawable.ic_category_food
-                    "transport" -> R.drawable.ic_category_transport
-                    "bills" -> R.drawable.ic_category_bills
-                    "entertainment" -> R.drawable.ic_category_entertainment
-                    "shopping" -> R.drawable.ic_category_shopping
-                    "health" -> R.drawable.ic_category_health
-                    "education" -> R.drawable.ic_category_education
-                    else -> R.drawable.ic_category_other
+        }
+
+        private fun getCategoryColorResource(category: String, isIncome: Boolean): Int {
+            return when {
+                isIncome -> {
+                    when (category.lowercase()) {
+                        "salary" -> R.color.category_salary
+                        "business" -> R.color.category_business
+                        "investment" -> R.color.category_investment
+                        "gift" -> R.color.category_gift
+                        else -> R.color.category_other
+                    }
+                }
+                else -> {
+                    when (category.lowercase()) {
+                        "food" -> R.color.category_food
+                        "transport" -> R.color.category_transport
+                        "bills" -> R.color.category_bills
+                        "entertainment" -> R.color.category_entertainment
+                        "shopping" -> R.color.category_shopping
+                        "health" -> R.color.category_health
+                        "education" -> R.color.category_education
+                        else -> R.color.category_other
+                    }
                 }
             }
         }
     }
-
-    override fun getItemCount(): Int = transactions.size
 }

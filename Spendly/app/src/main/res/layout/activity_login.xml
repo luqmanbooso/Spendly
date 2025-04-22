@@ -14,7 +14,7 @@
         android:layout_height="120dp"
         android:layout_marginTop="40dp"
         android:contentDescription="App Logo"
-        android:src="@mipmap/ic_launcher"
+        android:src="@drawable/ic_launcher"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -98,10 +98,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:fontFamily="@font/poppins"
+            android:fontFamily="@font/poppins_bold"
             android:padding="8dp"
             android:text="Forgot Password?"
-            android:textColor="@color/primary"
+            android:textColor="@color/black"
             android:textSize="14sp" />
 
         <com.google.android.material.button.MaterialButton
@@ -109,7 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:backgroundTint="@color/black"
+            android:backgroundTint="@color/primary_dark"
             android:textColor="@color/white"
             android:enabled="false"
             android:fontFamily="@font/poppins"
@@ -135,7 +135,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins"
+            android:fontFamily="@font/poppins_bold"
             android:text="New to Spendly? "
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
@@ -144,7 +144,7 @@
             android:id="@+id/tvSignUp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins"
+            android:fontFamily="@font/poppins_bold"
             android:padding="4dp"
             android:text="Sign Up"
             android:textColor="@color/primary"

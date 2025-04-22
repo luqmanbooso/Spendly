@@ -10,9 +10,9 @@ data class Transaction(
     val title: String = "",
     val amount: Double = 0.0,
     val category: String = "",
+    val isIncome : Boolean,
     val date: Long = System.currentTimeMillis(),
     val type: TransactionType = TransactionType.EXPENSE,
-    val note: String = ""
 ) : Parcelable
 
 enum class TransactionType {

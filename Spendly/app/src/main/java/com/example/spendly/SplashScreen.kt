@@ -126,20 +126,26 @@ class SplashScreen : AppCompatActivity() {
         // For now, just navigate to a placeholder activity
         // In a real implementation, you'd check login state and navigate accordingly
         val prefsManager = PrefsManager(this)
-        val userManager = UserManager(this)  // Add this line
+        val userManager = UserManager(this)
 
-        val intent = if (prefsManager.isFirstLaunch()) {
-            Intent(this, OnboardingActivity::class.java)
-        } else if (!userManager.isLoggedIn()) {  // Changed from prefsManager.isUserLoggedIn()
-            Intent(this, LoginActivity::class.java)
+        // If the user isn't properly logged in (either missing is_logged_in flag or email)
+        if (!userManager.isLoggedIn() || userManager.getCurrentUserEmail() == null) {
+            // Clear any partial login state
+            userManager.logout()
+
+            val intent = if (prefsManager.isFirstLaunch()) {
+                Intent(this, OnboardingActivity::class.java)
+            } else {
+                Intent(this, LoginActivity::class.java)
+            }
+
+            startActivity(intent)
         } else {
-            Intent(this, MainActivity::class.java)
+            // User is logged in, go to main screen
+            startActivity(Intent(this, MainActivity::class.java))
         }
 
-        startActivity(intent)
         finish()
-
-        // Add smooth transition animation
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 }

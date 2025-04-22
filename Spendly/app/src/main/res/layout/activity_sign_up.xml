@@ -157,7 +157,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="@color/black"
+                android:backgroundTint="@color/primary_dark"
                 android:enabled="false"
                 android:fontFamily="@font/poppins"
                 android:padding="14dp"
@@ -184,7 +184,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins"
+            android:fontFamily="@font/poppins_bold"
             android:text="Already have an account? "
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
@@ -193,7 +193,7 @@
             android:id="@+id/tvLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins"
+            android:fontFamily="@font/poppins_bold"
             android:padding="4dp"
             android:text="Login"
             android:textColor="@color/primary"

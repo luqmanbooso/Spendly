@@ -120,14 +120,17 @@ class SplashScreen : AppCompatActivity() {
         }, updateInterval)
     }
 
+
+
     private fun navigateToNextScreen() {
         // For now, just navigate to a placeholder activity
         // In a real implementation, you'd check login state and navigate accordingly
         val prefsManager = PrefsManager(this)
+        val userManager = UserManager(this)  // Add this line
 
         val intent = if (prefsManager.isFirstLaunch()) {
             Intent(this, OnboardingActivity::class.java)
-        } else if (!prefsManager.isUserLoggedIn()) {
+        } else if (!userManager.isLoggedIn()) {  // Changed from prefsManager.isUserLoggedIn()
             Intent(this, LoginActivity::class.java)
         } else {
             Intent(this, MainActivity::class.java)

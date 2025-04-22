@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">Spendly</string>
+    <string-array name="expense_categories">
+        <item>Food</item>
+        <item>Transport</item>
+        <item>Bills</item>
+        <item>Entertainment</item>
+        <item>Shopping</item>
+        <item>Health</item>
+        <item>Education</item>
+        <item>Housing</item>
+        <item>Personal</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="income_categories">
+        <item>Salary</item>
+        <item>Business</item>
+        <item>Investment</item>
+        <item>Gift</item>
+        <item>Allowance</item>
+        <item>Other</item>
+    </string-array>
 </resources>

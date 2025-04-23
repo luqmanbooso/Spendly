@@ -2,12 +2,19 @@ package com.example.spendly
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.spendly.TransactionAdapter
 import com.example.spendly.PrefsManager
@@ -20,6 +27,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "MainActivity"
+        private const val NOTIFICATION_PERMISSION_CODE = 123
+    }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefsManager: PrefsManager
@@ -42,8 +54,16 @@ class MainActivity : AppCompatActivity() {
         bottomNavHelper.setupBottomNav(NavSection.HOME)
         tvUserName = findViewById(R.id.tvUserName) // Added user name TextView
 
+//        findViewById<Button>(R.id.btnTestNotification).setOnClickListener {
+//            testNotificationDirectly()
+//        }
+
         btnSettings.setOnClickListener {
             openSettings()
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermission()
         }
 
         // Set the current month in the header
@@ -54,6 +74,8 @@ class MainActivity : AppCompatActivity() {
         setupDashboard()
         setupRecentTransactions()
 
+        checkBudgetAndScheduleReminders()
+
     }
 
     override fun onResume() {
@@ -63,6 +85,27 @@ class MainActivity : AppCompatActivity() {
         setupRecentTransactions()
     }
 
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= 33) { // Android 13 is API 33
+            // FIXED: Use correct permission constant
+            val hasPermission = ContextCompat.checkSelfPermission(
+                this,
+                "android.permission.POST_NOTIFICATIONS" // Use string directly to avoid compile errors
+            ) == PackageManager.PERMISSION_GRANTED
+
+            Log.d(TAG, "Notification permission already granted: $hasPermission")
+
+            if (!hasPermission) {
+                // Request the permission - use the string constant directly
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf("android.permission.POST_NOTIFICATIONS"),
+                    NOTIFICATION_PERMISSION_CODE
+                )
+                Log.d(TAG, "Requesting notification permission...")
+            }
+        }
+    }
 
     private fun openSettings() {
         val intent = Intent(this, SettingsActivity::class.java)
@@ -90,6 +133,12 @@ class MainActivity : AppCompatActivity() {
             binding.tvBalanceStatus.text = "Break-even point!"
         } else {
             binding.tvBalanceStatus.text = "You're on track!"
+        }
+
+        val viewbudget : TextView = findViewById(R.id.btnEditBudget)
+        viewbudget.setOnClickListener{
+            val intent = Intent(this,BudgetActivity::class.java)
+            startActivity(intent)
         }
 
         // Update budget info
@@ -167,15 +216,20 @@ class MainActivity : AppCompatActivity() {
             binding.tvNoTransactions.visibility = View.GONE
 
             binding.rvRecentTransactions.layoutManager = LinearLayoutManager(this)
+
+            // Fixed constructor call - now with optional delete parameter
             val adapter = TransactionAdapter(
                 recentTransactions,
-                prefsManager.getCurrencySymbol()
-            ) { transaction ->
-                val intent = Intent(this, AddTransactionActivity::class.java).apply {
-                    putExtra("TRANSACTION_ID", transaction.id)
+                prefsManager.getCurrencySymbol(),
+                onItemClick = { transaction ->
+                    val intent = Intent(this, AddTransactionActivity::class.java).apply {
+                        putExtra("TRANSACTION_ID", transaction.id)
+                        putExtra("IS_EDIT", true)
+                    }
+                    startActivity(intent)
                 }
-                startActivity(intent)
-            }
+                // No need to pass onDeleteClick since we made it optional
+            )
 
             binding.rvRecentTransactions.adapter = adapter
         }
@@ -185,6 +239,48 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, TransactionActivity::class.java))
         }
     }
+
+    private fun testNotificationDirectly() {
+        try {
+            val notificationHelper = NotificationHelper(this)
+            notificationHelper.showBudgetWarningNotification(85)
+            Toast.makeText(this, "Test notification sent directly", Toast.LENGTH_SHORT).show()
+            Log.d("MainActivity", "Test notification sent for user: ${NotificationHelper.USER_LOGIN}")
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error sending test notification: ${e.message}", e)
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun checkBudgetAndScheduleReminders() {
+        try {
+            // For regular checks in MainActivity, use regular service (not foreground)
+            if (prefsManager.shouldNotifyBudgetWarning()) {
+                val budgetIntent = Intent(this, BudgetCheckService::class.java).apply {
+                    action = BudgetCheckService.ACTION_CHECK_BUDGET
+                    // Don't set EXTRA_START_AS_FOREGROUND here
+                }
+                startService(budgetIntent)  // Regular service, not foreground
+                Log.d("MainActivity", "Budget check service started")
+            }
+
+            // Schedule reminders if enabled
+            if (prefsManager.shouldShowDailyReminders()) {
+                val reminderIntent = Intent(this, BudgetCheckService::class.java).apply {
+                    action = BudgetCheckService.ACTION_SCHEDULE_DAILY_REMINDER
+                    // Don't set EXTRA_START_AS_FOREGROUND here
+                }
+                startService(reminderIntent)  // Regular service, not foreground
+                Log.d("MainActivity", "Daily reminders scheduled")
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error starting service: ${e.message}", e)
+        }
+    }
+
+
+
+
 
 
 }

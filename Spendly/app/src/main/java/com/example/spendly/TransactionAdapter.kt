@@ -3,6 +3,7 @@ package com.example.spendly
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -14,7 +15,8 @@ import java.util.*
 class TransactionAdapter(
     private val transactions: List<Transaction>,
     private val currencySymbol: String,
-    private val onItemClick: (Transaction) -> Unit
+    private val onItemClick: (Transaction) -> Unit,
+    private val onDeleteClick: ((Transaction) -> Unit)? = null  // Make delete click optional
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -26,8 +28,25 @@ class TransactionAdapter(
         val transaction = transactions[position]
         holder.bind(transaction, currencySymbol)
 
+        // Set click listener for the item
         holder.itemView.setOnClickListener {
             onItemClick(transaction)
+        }
+
+        // Set delete button visibility and click listener
+        try {
+            val deleteButton = holder.itemView.findViewById<ImageButton>(R.id.btnDelete)
+            if (onDeleteClick != null) {
+                deleteButton?.visibility = View.VISIBLE
+                deleteButton?.setOnClickListener {
+                    onDeleteClick.invoke(transaction)
+                }
+            } else {
+                // Hide delete button in MainActivity
+                deleteButton?.visibility = View.GONE
+            }
+        } catch (e: Exception) {
+            // Handle if delete button doesn't exist in some layouts
         }
     }
 
@@ -76,6 +95,7 @@ class TransactionAdapter(
             cardCategoryIcon.setCardBackgroundColor(ContextCompat.getColor(context, categoryColorResId))
         }
 
+        // Your existing methods
         private fun getCategoryIconResource(category: String, isIncome: Boolean): Int {
             return when {
                 isIncome -> {
@@ -102,6 +122,7 @@ class TransactionAdapter(
         }
 
         private fun getCategoryColorResource(category: String, isIncome: Boolean): Int {
+            // Your existing code...
             return when {
                 isIncome -> {
                     when (category.lowercase()) {

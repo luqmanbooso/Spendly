@@ -41,6 +41,7 @@ class PrefsManager(context: Context) {
     }
 
 
+
     // Add these methods to your existing PrefsManager class
 
     // Budget Management
@@ -71,6 +72,21 @@ class PrefsManager(context: Context) {
         sharedPreferences.edit().putString(KEY_REMINDER_TIME, time).apply()
     }
 
+    // Add to PrefsManager.kt
+    fun getReminderTimeHour(): Int {
+        return sharedPreferences.getInt("reminder_hour", 20) // Default to 8:00 PM
+    }
+
+    fun getReminderTimeMinute(): Int {
+        return sharedPreferences.getInt("reminder_minute", 0)
+    }
+
+    fun setReminderTime(hour: Int, minute: Int) {
+        sharedPreferences.edit()
+            .putInt("reminder_hour", hour)
+            .putInt("reminder_minute", minute)
+            .apply()
+    }
 
 
     companion object {
@@ -84,5 +100,10 @@ class PrefsManager(context: Context) {
         private const val KEY_SHOW_DAILY_REMINDERS = "show_daily_reminders"
         private const val KEY_REMINDER_TIME = "reminder_time"
 
+        private const val KEY_CURRENCY = "currency"
+        private const val KEY_BUDGET_WARNING_THRESHOLD = "budget_warning_threshold"
+        private const val KEY_DAILY_REMINDERS = "daily_reminders"
+        private const val KEY_REMINDER_HOUR = "reminder_hour"
+        private const val KEY_REMINDER_MINUTE = "reminder_minute"
     }
 }

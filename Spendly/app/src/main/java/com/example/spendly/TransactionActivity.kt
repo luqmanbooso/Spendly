@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.spendly.AddTransactionActivity
@@ -48,6 +49,7 @@ class TransactionActivity : AppCompatActivity() {
         setupRecyclerView()
         setupFilterOptions()
         setupEmptyState()
+        setupButtons()
 
         // Load initial data
         loadTransactions()
@@ -72,6 +74,30 @@ class TransactionActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupButtons() {
+        // Add "Add Transaction" button functionality
+        binding.btnAddTransaction.setOnClickListener {
+            startActivity(Intent(this, AddTransactionActivity::class.java))
+            overridePendingTransition(R.anim.slide_up, R.anim.fade_out)
+        }
+
+        // Date filter button functionality
+        binding.btnDateFilter.setOnClickListener {
+            // Toggle date filter visibility
+            if (binding.layoutDateFilter.visibility == View.VISIBLE) {
+                binding.layoutDateFilter.visibility = View.GONE
+            } else {
+                binding.layoutDateFilter.visibility = View.VISIBLE
+                binding.layoutCategoryFilter.visibility = View.GONE
+                // Only change filter type if we're not already filtering by date
+                if (currentFilterType != FilterType.DATE) {
+                    currentFilterType = FilterType.DATE
+                    binding.chipAll.isChecked = false
+                }
+            }
+        }
+    }
+
     private fun setupRecyclerView() {
         binding.rvTransactions.layoutManager = LinearLayoutManager(this)
 
@@ -82,8 +108,12 @@ class TransactionActivity : AppCompatActivity() {
             emptyList,
             prefsManager.getCurrencySymbol(),
             onItemClick = { transaction ->
-                // Show transaction details or edit option
-                showTransactionOptionsDialog(transaction)
+                // When item is clicked, edit the transaction
+                editTransaction(transaction)
+            },
+            onDeleteClick = { transaction ->
+                // When delete icon is clicked, confirm deletion
+                confirmDeleteTransaction(transaction)
             }
         )
         binding.rvTransactions.adapter = transactionAdapter
@@ -111,10 +141,20 @@ class TransactionActivity : AppCompatActivity() {
                 transactions,
                 prefsManager.getCurrencySymbol(),
                 onItemClick = { transaction ->
-                    showTransactionOptionsDialog(transaction)
+                    // When item is clicked, edit the transaction
+                    editTransaction(transaction)
+                },
+                onDeleteClick = { transaction ->
+                    // When delete icon is clicked, confirm deletion
+                    confirmDeleteTransaction(transaction)
                 }
             )
             binding.rvTransactions.adapter = transactionAdapter
+
+            // Add animation to recycler view items
+            val animation = AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_fall_down)
+            binding.rvTransactions.layoutAnimation = animation
+            binding.rvTransactions.scheduleLayoutAnimation()
         }
     }
 
@@ -139,15 +179,11 @@ class TransactionActivity : AppCompatActivity() {
                         binding.layoutDateFilter.visibility = View.GONE
                         binding.layoutCategoryFilter.visibility = View.GONE
                     }
-                    R.id.chipDate -> {
-                        currentFilterType = FilterType.DATE
-                        binding.layoutDateFilter.visibility = View.VISIBLE
-                        binding.layoutCategoryFilter.visibility = View.GONE
-                    }
                     R.id.chipCategory -> {
                         currentFilterType = FilterType.CATEGORY
                         binding.layoutDateFilter.visibility = View.GONE
                         binding.layoutCategoryFilter.visibility = View.VISIBLE
+                        showCategorySelector()
                     }
                 }
                 loadTransactions()
@@ -214,7 +250,6 @@ class TransactionActivity : AppCompatActivity() {
         updateSummary(transactions)
     }
 
-
     private fun updateSummary(transactions: List<Transaction>) {
         val currencySymbol = prefsManager.getCurrencySymbol()
 
@@ -243,12 +278,12 @@ class TransactionActivity : AppCompatActivity() {
             FilterType.INCOME -> "Income Transactions"
             FilterType.EXPENSE -> "Expense Transactions"
             FilterType.DATE -> {
-                val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
                 val startStr = startDate?.let { dateFormat.format(it.time) } ?: "Any"
                 val endStr = endDate?.let { dateFormat.format(it.time) } ?: "Any"
                 "Transactions: $startStr to $endStr"
             }
-            FilterType.CATEGORY -> "Transactions: ${selectedCategory ?: "All Categories"}"
+            FilterType.CATEGORY -> "Category: ${selectedCategory ?: "All"}"
         }
         binding.tvTransactionsHeader.text = headerText
     }
@@ -296,47 +331,13 @@ class TransactionActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showTransactionOptionsDialog(transaction: Transaction) {
-        val options = arrayOf("View Details", "Edit", "Delete")
-
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Transaction Options")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> showTransactionDetails(transaction)
-                    1 -> editTransaction(transaction)
-                    2 -> confirmDeleteTransaction(transaction)
-                }
-            }
-            .show()
-    }
-
-    private fun showTransactionDetails(transaction: Transaction) {
-        // Build a dialog with transaction details
-        val currencySymbol = prefsManager.getCurrencySymbol()
-        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
-        val date = dateFormat.format(Date(transaction.date))
-
-        val message = """
-            Amount: ${CurrencyFormatter.formatAmount(transaction.amount, currencySymbol)}
-            Type: ${if (transaction.isIncome) "Income" else "Expense"}
-            Category: ${transaction.category}
-            Date: $date
-        """.trimIndent()
-
-        MaterialAlertDialogBuilder(this)
-            .setTitle(transaction.title)
-            .setMessage(message)
-            .setPositiveButton("Close", null)
-            .show()
-    }
-
     private fun editTransaction(transaction: Transaction) {
         // Launch edit transaction activity with the transaction data
         val intent = Intent(this, AddTransactionActivity::class.java)
         intent.putExtra("TRANSACTION_ID", transaction.id)
         intent.putExtra("IS_EDIT", true)
         startActivity(intent)
+        overridePendingTransition(R.anim.slide_up, R.anim.fade_out)
     }
 
     private fun confirmDeleteTransaction(transaction: Transaction) {

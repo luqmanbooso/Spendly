@@ -9,8 +9,10 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:layout_height="120dp"
+        android:paddingTop="24dp"
+        android:background="@color/primary"
+        app:liftOnScroll="true"
         android:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
@@ -19,7 +21,7 @@
             android:layout_height="?attr/actionBarSize"
             app:titleTextAppearance="@style/TextAppearance.Toolbar.Title"
             app:titleCentered="true"
-            app:titleTextColor="@color/text_primary" />
+            app:titleTextColor="@color/white" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -34,14 +36,19 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Tabs for switching between analysis and reports -->
+            <!-- Modern Tabs for switching between analysis and reports -->
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
+                android:elevation="4dp"
                 app:tabIndicatorColor="@color/primary"
+                app:tabIndicatorHeight="3dp"
                 app:tabSelectedTextColor="@color/primary"
+                app:tabTextAppearance="@style/TabTextAppearance"
+                app:tabMode="fixed"
+                app:tabRippleColor="@color/ripple_color"
                 app:tabTextColor="@color/text_secondary">
 
                 <com.google.android.material.tabs.TabItem
@@ -55,7 +62,7 @@
                     android:text="Reports" />
             </com.google.android.material.tabs.TabLayout>
 
-            <!-- Period Selection -->
+            <!-- Period Selection with smooth scroll -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -64,13 +71,16 @@
                 android:clipToPadding="false"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:scrollbars="none">
+                android:scrollbars="none"
+                android:fadingEdgeLength="24dp"
+                android:requiresFadingEdge="horizontal">
 
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/periodChipGroup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:singleSelection="true">
+                    app:singleSelection="true"
+                    app:chipSpacingHorizontal="8dp">
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipThisMonth"
@@ -78,7 +88,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="This Month"
-                        app:chipBackgroundColor="@color/chip_background_checked" />
+                        android:textColor="@color/chip_text_color"
+                        app:chipBackgroundColor="@color/chip_background_color_selector"
+                        app:chipStrokeColor="@color/primary"
+                        app:chipStrokeWidth="1dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipLastMonth"
@@ -86,7 +99,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Last Month"
-                        app:chipBackgroundColor="@color/chip_background_unchecked" />
+                        android:textColor="@color/chip_text_color"
+                        app:chipBackgroundColor="@color/chip_background_color_selector"
+                        app:chipStrokeColor="@color/primary"
+                        app:chipStrokeWidth="1dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipLast3Months"
@@ -94,7 +110,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Last 3 Months"
-                        app:chipBackgroundColor="@color/chip_background_unchecked" />
+                        android:textColor="@color/chip_text_color"
+                        app:chipBackgroundColor="@color/chip_background_color_selector"
+                        app:chipStrokeColor="@color/primary"
+                        app:chipStrokeWidth="1dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipThisYear"
@@ -102,32 +121,50 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="This Year"
-                        app:chipBackgroundColor="@color/chip_background_unchecked" />
+                        android:textColor="@color/chip_text_color"
+                        app:chipBackgroundColor="@color/chip_background_color_selector"
+                        app:chipStrokeColor="@color/primary"
+                        app:chipStrokeWidth="1dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipCustom"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Custom"
+                        android:textColor="@color/chip_text_color"
+                        app:chipBackgroundColor="@color/chip_background_color_selector"
+                        app:chipStrokeColor="@color/primary"
+                        app:chipStrokeWidth="1dp"
+                        app:chipIcon="@drawable/ic_calendar"
+                        app:chipIconTint="@color/chip_icon_color" />
                 </com.google.android.material.chip.ChipGroup>
             </HorizontalScrollView>
 
-            <!-- Chart Card -->
+            <!-- Chart Card with improved styling -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/chartCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
                 android:layout_marginEnd="16dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:baselineAligned="true">
 
                         <TextView
                             android:id="@+id/analysisSectionTitle"
@@ -145,8 +182,8 @@
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins_semibold"
                             android:text="$0.00"
-                            android:textColor="@color/text_primary"
-                            android:textSize="18sp" />
+                            android:textColor="@color/primary"
+                            android:textSize="20sp" />
                     </LinearLayout>
 
                     <TextView
@@ -159,28 +196,39 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
 
-                    <!-- Empty state container -->
+                    <!-- Empty state container with animation -->
                     <LinearLayout
                         android:id="@+id/emptyStateContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="32dp"
+                        android:padding="48dp"
                         android:visibility="gone">
 
                         <ImageView
-                            android:layout_width="100dp"
-                            android:layout_height="100dp"
+                            android:id="@+id/emptyStateAnimation"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
                             android:layout_marginBottom="16dp"
                             android:src="@drawable/ic_empty_data" />
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/poppins_medium"
+                            android:gravity="center"
+                            android:text="No data for this period"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
                             android:fontFamily="@font/poppins"
                             android:gravity="center"
-                            android:text="No data available for the selected period"
+                            android:text="Try selecting a different time period or add more transactions"
                             android:textColor="@color/text_secondary"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -195,22 +243,38 @@
                         <com.github.mikephil.charting.charts.PieChart
                             android:id="@+id/pieChart"
                             android:layout_width="match_parent"
-                            android:layout_height="300dp"
+                            android:layout_height="320dp"
                             android:layout_marginTop="16dp" />
 
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/lineChart"
                             android:layout_width="match_parent"
-                            android:layout_height="300dp"
+                            android:layout_height="320dp"
                             android:layout_marginTop="16dp"
                             android:visibility="gone" />
 
-                        <!-- Category expenses list -->
+                        <!-- Category expenses list with divider -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="24dp"
+                            android:fontFamily="@font/poppins_medium"
+                            android:text="Top Categories"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="#E0E0E0" />
+
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/rvCategoryExpenses"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
+                            android:layout_marginTop="8dp"
                             android:nestedScrollingEnabled="false"
                             tools:itemCount="3"
                             tools:listitem="@layout/item_category_expense" />
@@ -218,7 +282,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Summary Card -->
+            <!-- Summary Card with enhanced visuals -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/summaryCard"
                 android:layout_width="match_parent"
@@ -228,19 +292,20 @@
                 android:layout_marginEnd="16dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_medium"
-                        android:text="Summary"
+                        android:text="Financial Summary"
                         android:textColor="@color/text_primary"
                         android:textSize="18sp" />
 
@@ -248,8 +313,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginTop="12dp"
-                        android:layout_marginBottom="12dp"
-                        android:background="#EEEEEE" />
+                        android:layout_marginBottom="16dp"
+                        android:background="#E0E0E0" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -257,18 +322,24 @@
                         android:baselineAligned="false"
                         android:orientation="horizontal">
 
-                        <!-- Income -->
+                        <!-- Income with enhanced styling -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/card_income_bg"
+                            android:padding="12dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins"
                                 android:text="Income"
+                                android:drawableStart="@drawable/ic_income"
+                                android:drawablePadding="4dp"
+                                android:gravity="center"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="14sp" />
 
@@ -276,25 +347,36 @@
                                 android:id="@+id/tvIncomeAmount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="8dp"
                                 android:fontFamily="@font/poppins_semibold"
                                 android:textColor="@color/success"
                                 android:textSize="18sp"
                                 tools:text="$3,500.00" />
                         </LinearLayout>
 
-                        <!-- Expense -->
+                        <!-- Spacer -->
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="match_parent" />
+
+                        <!-- Expense with enhanced styling -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:background="@drawable/card_expense_bg"
+                            android:padding="12dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins"
                                 android:text="Expense"
+                                android:drawableStart="@drawable/ic_budget"
+                                android:drawablePadding="4dp"
+                                android:gravity="center"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="14sp" />
 
@@ -302,43 +384,49 @@
                                 android:id="@+id/tvExpenseAmount"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="8dp"
                                 android:fontFamily="@font/poppins_semibold"
                                 android:textColor="@color/expense"
                                 android:textSize="18sp"
                                 tools:text="$2,500.00" />
                         </LinearLayout>
+                    </LinearLayout>
 
-                        <!-- Balance -->
-                        <LinearLayout
+                    <!-- Balance with visual emphasis -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/card_balance_bg"
+                        android:padding="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/poppins_medium"
+                            android:text="NET BALANCE"
+                            android:drawableStart="@drawable/ic_category_bills"
+                            android:drawablePadding="8dp"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/tvBalanceAmount"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="@font/poppins"
-                                android:text="Balance"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:id="@+id/tvBalanceAmount"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:fontFamily="@font/poppins_semibold"
-                                android:textColor="@color/success"
-                                android:textSize="18sp"
-                                tools:text="$1,000.00" />
-                        </LinearLayout>
+                            android:gravity="end"
+                            android:fontFamily="@font/poppins_semibold"
+                            android:textColor="@color/success"
+                            android:textSize="20sp"
+                            tools:text="$1,000.00" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Export Options -->
+            <!-- Export Card with modern design -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/exportCard"
                 android:layout_width="match_parent"
@@ -349,13 +437,14 @@
                 android:layout_marginBottom="16dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -369,14 +458,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins"
-                        android:text="Export your transaction data for the selected period"
+                        android:text="Export your financial data for the selected period"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="20dp"
                         android:orientation="horizontal">
 
                         <com.google.android.material.button.MaterialButton
@@ -386,9 +475,13 @@
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
                             android:backgroundTint="@color/primary"
-                            android:text="CSV"
+                            android:padding="12dp"
+                            android:text="Export as CSV"
                             android:textAllCaps="false"
-                            app:icon="@drawable/ic_csv" />
+                            app:cornerRadius="8dp"
+                            app:icon="@drawable/ic_csv"
+                            app:iconGravity="textStart"
+                            app:iconTint="@color/white" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnExportPdf"
@@ -397,9 +490,13 @@
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
                             android:backgroundTint="@color/expense"
-                            android:text="PDF"
+                            android:padding="12dp"
+                            android:text="Export as PDF"
                             android:textAllCaps="false"
-                            app:icon="@drawable/ic_pdf" />
+                            app:cornerRadius="8dp"
+                            app:icon="@drawable/ic_pdf"
+                            app:iconGravity="textStart"
+                            app:iconTint="@color/white" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

@@ -2,10 +2,12 @@ package com.example.spendly
 
 import android.content.Context
 import android.widget.Toast
+import com.opencsv.CSVWriter
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -193,6 +195,8 @@ class BackupHelper(private val context: Context) {
         }
     }
 
+
+
     /**
      * Performs a full backup of all transactions
      */
@@ -231,3 +235,39 @@ class BackupHelper(private val context: Context) {
         }?.toList() ?: emptyList()
     }
 }
+
+// Add this method to your BackupHelper class
+fun exportTransactionsToCSV(transactions: List<Transaction>, csvFile: File): Boolean {
+    try {
+        val fileWriter = FileWriter(csvFile)
+        val csvWriter = CSVWriter(fileWriter)
+
+        // Write header
+        val header = arrayOf("Date", "Type", "Category", "Title", "Amount", "Notes")
+        csvWriter.writeNext(header)
+
+        // Write data
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+        for (transaction in transactions) {
+            val dateStr = dateFormat.format(Date(transaction.date))
+            val typeStr = if (transaction.type == TransactionType.INCOME) "Income" else "Expense"
+            val row = arrayOf(
+                dateStr,
+                typeStr,
+                transaction.category,
+                transaction.title,
+                transaction.amount.toString(),
+            )
+            csvWriter.writeNext(row)
+        }
+
+        csvWriter.close()
+        fileWriter.close()
+        return true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return false
+    }
+}
+

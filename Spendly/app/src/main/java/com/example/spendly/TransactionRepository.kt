@@ -291,6 +291,117 @@ class TransactionRepository(private val context: Context) {
 
         return result.asReversed()  // Return in chronological order
     }
+    // Overloaded method to get weekly data with custom date range
+    fun getWeeklyData(numberOfWeeks: Int, startDate: Long, endDate: Long): List<WeeklyData> {
+        val calendar = Calendar.getInstance().apply { timeInMillis = endDate }
+        val result = mutableListOf<WeeklyData>()
+        val minDate = startDate
+
+        // Start from the end date and go back
+        for (i in 0 until numberOfWeeks) {
+            if (i > 0) {
+                calendar.add(Calendar.WEEK_OF_YEAR, -1)
+            }
+
+            // Calculate current week's end date
+            val endOfWeek = calendar.timeInMillis.coerceAtMost(endDate)  // Fixed typo: removed the 's'
+
+            // Set to first day of the week
+            calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
+            var startOfWeek = calendar.timeInMillis
+
+            // If we've gone past the start date, break out of the loop
+            if (endOfWeek < minDate) {
+                break
+            }
+
+            // Adjust start of week if it's before our minimum date
+            if (startOfWeek < minDate) {
+                startOfWeek = minDate
+            }
+
+            // Find week label (e.g., "Week 1")
+            val weekNumber = calendar.get(Calendar.WEEK_OF_MONTH)
+            val monthName = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())
+            val weekLabel = "W$weekNumber-$monthName"
+
+            // Calculate income and expense for this week
+            var income = 0.0
+            var expense = 0.0
+
+            getTransactionsForPeriod(startOfWeek, endOfWeek).forEach { transaction ->
+                if (transaction.isIncome) {
+                    income += transaction.amount
+                } else {
+                    expense += transaction.amount
+                }
+            }
+
+            result.add(WeeklyData(weekLabel, income, expense))
+        }
+
+        return result.asReversed()  // Return in chronological order
+    }
+
+    // Overloaded method to get monthly data with custom date range
+    fun getMonthlyData(numberOfMonths: Int, startDate: Long, endDate: Long): List<MonthlyData> {
+        val calendar = Calendar.getInstance().apply { timeInMillis = endDate }
+        val result = mutableListOf<MonthlyData>()
+        val minDate = startDate
+
+        // Process months up to the specified number or until we reach minDate
+        for (i in 0 until numberOfMonths) {
+            if (i > 0) {
+                calendar.add(Calendar.MONTH, -1)
+            }
+
+            // Create month label
+            val month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) ?: "Unknown"
+            val year = calendar.get(Calendar.YEAR)
+            val monthLabel = "$month ${year.toString().substring(2)}"
+
+            // Set to first day of the month
+            calendar.set(Calendar.DAY_OF_MONTH, 1)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            var startOfMonth = calendar.timeInMillis
+
+            // Move to last day of the month
+            calendar.add(Calendar.MONTH, 1)
+            calendar.add(Calendar.MILLISECOND, -1)
+            var endOfMonth = calendar.timeInMillis
+
+            // If this month is entirely before our minimum date, break
+            if (endOfMonth < minDate) {
+                break
+            }
+
+            // Adjust period boundaries to respect the overall date range
+            if (startOfMonth < minDate) startOfMonth = minDate
+            if (endOfMonth > endDate) endOfMonth = endDate
+
+            // Calculate income and expense for this month
+            var income = 0.0
+            var expense = 0.0
+
+            getTransactionsForPeriod(startOfMonth, endOfMonth).forEach { transaction ->
+                if (transaction.isIncome) {
+                    income += transaction.amount
+                } else {
+                    expense += transaction.amount
+                }
+            }
+
+            result.add(MonthlyData(monthLabel, income, expense))
+
+            // Reset to beginning of month for next iteration
+            calendar.add(Calendar.MILLISECOND, 1)
+        }
+
+        return result.asReversed()  // Return in chronological order
+    }
 
     fun getExpenseForCategory(category: String): Double {
         val calendar = Calendar.getInstance()
@@ -333,3 +444,4 @@ class TransactionRepository(private val context: Context) {
         private const val KEY_TRANSACTIONS = "transactions"
     }
 }
+

@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-
-    <!-- Base application theme -->
-    <style name="Base.Theme.Spendly" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Base theme properties if needed -->
-    </style>
-
     <!-- Main application theme -->
-    <style name="Theme.Spendly" parent="Base.Theme.Spendly">
+    <style name="Theme.Spendly" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_dark</item>
@@ -28,6 +22,23 @@
 
         <!-- Custom toolbar text appearance -->
         <item name="toolbarStyle">@style/Widget.Spendly.Toolbar</item>
-    </style>
 
+        <!-- THESE ARE THE KEY FIXES: -->
+        <!-- Remove all default padding applied by framework -->
+        <item name="android:windowContentOverlay">@null</item>
+
+        <!-- Fix for top padding -->
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
+
+        <!-- Fix for bottom padding -->
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <!-- Fix for edge-to-edge layout -->
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
+
+        <!-- Fix for default padding in MaterialComponents theme -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
 </resources>

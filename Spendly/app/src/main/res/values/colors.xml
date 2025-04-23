@@ -9,6 +9,7 @@
 
     <color name="black">#000000</color> <!-- Light Orange -->
 
+    <color name="ripple_color">#404F46E5</color>
     <!-- Text Colors -->
     <color name="text_primary">#212121</color> <!-- Dark Gray -->
     <color name="text_secondary">#757575</color> <!-- Light Gray -->

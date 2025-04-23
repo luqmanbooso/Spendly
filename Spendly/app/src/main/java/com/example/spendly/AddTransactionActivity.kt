@@ -1,6 +1,7 @@
 package com.example.spendly
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,13 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
-import com.example.spendly.R
-import com.example.spendly.CategoryAdapter
 import com.example.spendly.databinding.ActivityAddTransactionBinding
-import com.example.spendly.Category
-import com.example.spendly.Transaction
-import com.example.spendly.TransactionType
-import com.example.spendly.TransactionRepository
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import java.text.SimpleDateFormat
@@ -113,6 +108,7 @@ class AddTransactionActivity : AppCompatActivity() {
             calendar.get(Calendar.DAY_OF_MONTH)
         )
 
+        datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
         datePickerDialog.show()
     }
 
@@ -148,6 +144,7 @@ class AddTransactionActivity : AppCompatActivity() {
             binding.tvSelectedCategory.text = category.title
             binding.tvSelectedCategory.visibility = View.VISIBLE
 
+            // Update save button state
             updateSaveButtonState()
         }
 
@@ -197,7 +194,7 @@ class AddTransactionActivity : AppCompatActivity() {
     }
 
     private fun validateAmount(): Boolean {
-        val amountText = binding.etAmount.text.toString()
+        val amountText = binding.etAmount.text.toString().trim()
         if (amountText.isBlank()) {
             binding.tvAmountError.visibility = View.VISIBLE
             binding.tvAmountError.text = "Please enter an amount"
@@ -222,9 +219,14 @@ class AddTransactionActivity : AppCompatActivity() {
     }
 
     private fun validateTitle(): Boolean {
-        val titleText = binding.etTitle.text.toString()
+        val titleText = binding.etTitle.text.toString().trim()
         if (titleText.isBlank()) {
             binding.tilTitle.error = "Title is required"
+            return false
+        }
+
+        if (titleText.length < 3) {
+            binding.tilTitle.error = "Title must be at least 3 characters"
             return false
         }
 
@@ -232,11 +234,22 @@ class AddTransactionActivity : AppCompatActivity() {
         return true
     }
 
+    private fun validateCategory(): Boolean {
+        if (selectedCategory == null) {
+            binding.tvCategoryError.visibility = View.VISIBLE
+            return false
+        }
+
+        binding.tvCategoryError.visibility = View.GONE
+        return true
+    }
+
     private fun updateSaveButtonState() {
-        val isValid = binding.etTitle.text.toString().isNotBlank() &&
-                binding.etAmount.text.toString().isNotBlank() &&
+        val isValid = binding.etTitle.text.toString().trim().isNotBlank() &&
+                binding.etAmount.text.toString().trim().isNotBlank() &&
                 selectedCategory != null &&
-                validateAmount()
+                validateAmount() &&
+                validateTitle()
 
         binding.btnSave.isEnabled = isValid
     }
@@ -263,8 +276,7 @@ class AddTransactionActivity : AppCompatActivity() {
         }
 
         // Validate category
-        if (selectedCategory == null) {
-            Snackbar.make(binding.root, "Please select a category", Snackbar.LENGTH_SHORT).show()
+        if (!validateCategory()) {
             isValid = false
         }
 
@@ -286,17 +298,21 @@ class AddTransactionActivity : AppCompatActivity() {
                 category = category,
                 date = selectedDate,
                 type = currentType,
-                isIncome = isIncome  // Add this line
+                isIncome = isIncome
             ) ?: Transaction(
                 title = title,
                 amount = amount,
                 category = category,
                 date = selectedDate,
                 type = currentType,
-                isIncome = isIncome  // Add this line
+                isIncome = isIncome
             )
 
             repository.saveTransaction(transaction)
+
+            val budgetIntent = Intent(this, BudgetCheckService::class.java)
+            budgetIntent.action = BudgetCheckService.ACTION_CHECK_BUDGET
+            startService(budgetIntent)
 
             showSuccessMessage()
             finish()

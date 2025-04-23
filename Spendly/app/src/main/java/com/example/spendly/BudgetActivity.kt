@@ -9,13 +9,21 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.spendly.databinding.ActivityBudgetBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.app.TimePickerDialog
+import android.content.Context
+import android.graphics.Color
+import android.view.animation.OvershootInterpolator
+import androidx.recyclerview.widget.DefaultItemAnimator
+import java.util.*
 
 class BudgetActivity : AppCompatActivity() {
 
@@ -37,17 +45,20 @@ class BudgetActivity : AppCompatActivity() {
 
         setupBottomNav()
         setupToolbar()
-        setupMonthlyBudget()
-        setupCategoryBudgets()
-        setupNotifications()
 
-        // Apply entrance animations
+        // Apply entrance animations first
         applyAnimations()
+
+        // Then load content with subtle animations
+        binding.root.postDelayed({
+            setupMonthlyBudget()
+            setupCategoryBudgets()
+            setupNotifications()
+        }, 300)
     }
 
     private fun setupBottomNav() {
         try {
-            // Make sure the bottomNavHelper is initialized after setContentView
             if (::bottomNavHelper.isInitialized) {
                 bottomNavHelper.setupBottomNav(NavSection.BUDGET)
             } else {
@@ -66,25 +77,51 @@ class BudgetActivity : AppCompatActivity() {
     }
 
     private fun applyAnimations() {
+        // Animate the main budget card with a slide up and subtle bounce
         val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
+        slideUp.interpolator = OvershootInterpolator(0.8f)
         binding.cardMonthlyBudget.startAnimation(slideUp)
 
-        val categoryHeader = binding.categoryBudgetsHeader
-        categoryHeader.alpha = 0f
-        categoryHeader.animate().alpha(1f).setDuration(500).setStartDelay(300).start()
+        // Animate the headers with a fade in
+        binding.categoryBudgetsHeader.alpha = 0f
+        binding.categoryBudgetsHeader.animate()
+            .alpha(1f)
+            .setDuration(600)
+            .setStartDelay(400)
+            .start()
 
-        val staggeredAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up)
-
-        binding.root.postDelayed({
-            binding.notificationCard.startAnimation(staggeredAnimation)
-        }, 200)
+        // Staggered animation for cards
+        binding.notificationCard.alpha = 0f
+        binding.notificationCard.translationY = 100f
+        binding.notificationCard.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(500)
+            .setStartDelay(600)
+            .start()
     }
 
     private fun setupMonthlyBudget() {
         val currencySymbol = prefsManager.getCurrencySymbol()
         val monthlyBudget = prefsManager.getMonthlyBudget()
 
+        // IMPORTANT: First, explicitly set visibility of all elements
+        // This ensures proper state management regardless of previous state
         if (monthlyBudget > 0) {
+            // BUDGET IS SET
+            // Show the budget info layout and hide the empty state
+            binding.layoutBudgetSet.visibility = View.VISIBLE
+            binding.layoutNoBudget.visibility = View.GONE
+
+            // Explicitly show Edit and Delete buttons
+            binding.btnEditBudget.visibility = View.VISIBLE
+            binding.btnDeleteBudget.visibility = View.VISIBLE
+
+            // Set "Set Budget Now" button properties for when it becomes visible
+            binding.btnCreateBudget.text = "Set Budget Now"
+            binding.btnCreateBudget.setIconResource(R.drawable.ic_add)
+
+            // Display budget information
             binding.tvMonthlyBudget.text = CurrencyFormatter.formatAmount(monthlyBudget, currencySymbol)
 
             // Calculate progress
@@ -93,7 +130,11 @@ class BudgetActivity : AppCompatActivity() {
                 ((totalExpense / monthlyBudget) * 100).toInt().coerceIn(0, 100)
             } else 0
 
-            binding.progressBudget.progress = percentSpent
+            // Animate the progress bar
+            binding.progressBudget.progress = 0
+            binding.progressBudget.animate().alpha(1f).setDuration(500).start()
+            animateProgressBar(percentSpent)
+
             binding.tvBudgetPercent.text = "$percentSpent%"
 
             val spent = CurrencyFormatter.formatAmount(totalExpense, currencySymbol)
@@ -125,19 +166,83 @@ class BudgetActivity : AppCompatActivity() {
                 }
             }
         } else {
-            binding.tvMonthlyBudget.text = "No budget set"
+            // NO BUDGET SET
+            // Show the empty state layout and hide the budget info
+            binding.layoutBudgetSet.visibility = View.GONE
+            binding.layoutNoBudget.visibility = View.VISIBLE
+
+            // Explicitly hide Edit and Delete buttons
+            binding.btnEditBudget.visibility = View.GONE
+            binding.btnDeleteBudget.visibility = View.GONE
+
+            // Enhance "Create Budget" button to be more prominent
+            binding.btnCreateBudget.text = "Set Budget Now"
+            binding.btnCreateBudget.setIconResource(R.drawable.ic_add)
+            binding.btnCreateBudget.setBackgroundColor(getColor(R.color.primary))
+
+            // Reset any progress values
             binding.progressBudget.progress = 0
-            binding.tvBudgetPercent.text = "0%"
-            binding.tvBudgetStatus.text = "Set a budget to track spending"
-            binding.tvBudgetStatus.setTextColor(getColor(R.color.text_secondary))
-            binding.tvSpent.text = CurrencyFormatter.formatAmount(0.0, currencySymbol)
-            binding.tvRemaining.text = CurrencyFormatter.formatAmount(0.0, currencySymbol)
         }
 
-        // Set up edit button
+        // Set up button click handlers
         binding.btnEditBudget.setOnClickListener {
             showBudgetEditDialog()
         }
+
+        binding.btnDeleteBudget.setOnClickListener {
+            confirmDeleteBudget()
+        }
+
+        binding.btnCreateBudget.setOnClickListener {
+            showBudgetAddDialog()
+        }
+    }
+
+    private fun animateProgressBar(targetProgress: Int) {
+        val animator = android.animation.ValueAnimator.ofInt(0, targetProgress)
+        animator.duration = 1000
+        animator.addUpdateListener { animation ->
+            val progress = animation.animatedValue as Int
+            binding.progressBudget.progress = progress
+        }
+        animator.start()
+    }
+
+    private fun confirmDeleteBudget() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Delete Monthly Budget")
+            .setMessage("Are you sure you want to delete your monthly budget? This will reset your budget tracking.")
+            .setPositiveButton("Delete") { _, _ ->
+                // Reset budget to ZERO
+                prefsManager.setMonthlyBudget(0.0)
+
+                // Show a fade out animation for the budget layout
+                binding.layoutBudgetSet.animate()
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction {
+                        // IMPORTANT: Explicitly hide buttons to ensure clean state
+                        binding.btnEditBudget.visibility = View.GONE
+                        binding.btnDeleteBudget.visibility = View.GONE
+
+                        // Refresh the UI
+                        setupMonthlyBudget()
+
+                        // Fade in the no-budget layout
+                        binding.layoutNoBudget.alpha = 0f
+                        binding.layoutNoBudget.animate()
+                            .alpha(1f)
+                            .setDuration(300)
+                            .start()
+
+                        Snackbar.make(binding.root, "Monthly budget deleted", Snackbar.LENGTH_LONG)
+                            .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+                            .show()
+                    }
+                    .start()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun setupCategoryBudgets() {
@@ -146,11 +251,25 @@ class BudgetActivity : AppCompatActivity() {
         if (categoryBudgets.isEmpty()) {
             binding.rvCategoryBudgets.visibility = View.GONE
             binding.layoutEmptyCategoryBudgets.visibility = View.VISIBLE
+
+            // Fade in empty state
+            binding.layoutEmptyCategoryBudgets.alpha = 0f
+            binding.layoutEmptyCategoryBudgets.animate()
+                .alpha(1f)
+                .setDuration(500)
+                .start()
+
         } else {
             binding.rvCategoryBudgets.visibility = View.VISIBLE
             binding.layoutEmptyCategoryBudgets.visibility = View.GONE
 
             binding.rvCategoryBudgets.layoutManager = LinearLayoutManager(this)
+
+            // Add nice item animations
+            val itemAnimator = binding.rvCategoryBudgets.itemAnimator as DefaultItemAnimator
+            itemAnimator.addDuration = 300
+            itemAnimator.removeDuration = 300
+
             categoryBudgetAdapter = CategoryBudgetAdapter(
                 this,
                 categoryBudgets,
@@ -179,7 +298,21 @@ class BudgetActivity : AppCompatActivity() {
 
             // If enabled, start the budget check service
             if (isChecked) {
-                startService(Intent(this, BudgetCheckService::class.java))
+                val intent = Intent(this, BudgetCheckService::class.java)
+                intent.action = BudgetCheckService.ACTION_CHECK_BUDGET
+                startService(intent)
+
+                Snackbar.make(binding.root,
+                    "Budget alerts enabled",
+                    Snackbar.LENGTH_SHORT)
+                    .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+                    .show()
+            } else {
+                Snackbar.make(binding.root,
+                    "Budget alerts disabled",
+                    Snackbar.LENGTH_SHORT)
+                    .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+                    .show()
             }
         }
 
@@ -188,56 +321,198 @@ class BudgetActivity : AppCompatActivity() {
         binding.switchDailyReminders.setOnCheckedChangeListener { _, isChecked ->
             prefsManager.setShouldShowDailyReminders(isChecked)
             binding.btnSetReminderTime.isEnabled = isChecked
+
+            // Animate the time button visibility
+            if (isChecked) {
+                binding.btnSetReminderTime.animate()
+                    .alpha(1f)
+                    .setDuration(300)
+                    .start()
+            } else {
+                binding.btnSetReminderTime.animate()
+                    .alpha(0.5f)
+                    .setDuration(300)
+                    .start()
+            }
+
+            try {
+                // Schedule or cancel daily reminders based on the switch
+                if (isChecked) {
+                    val intent = Intent(this, BudgetCheckService::class.java)
+                    intent.action = BudgetCheckService.ACTION_SCHEDULE_DAILY_REMINDER
+                    startService(intent)
+
+                    Snackbar.make(binding.root,
+                        "Daily reminders enabled",
+                        Snackbar.LENGTH_SHORT)
+                        .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+                        .show()
+
+                } else {
+                    // Cancel scheduled reminder
+                    val intent = Intent(this, BudgetCheckService::class.java)
+                    intent.action = BudgetCheckService.ACTION_DAILY_REMINDER
+                    val pendingIntent = PendingIntent.getService(
+                        this,
+                        1001,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+
+                    val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    alarmManager.cancel(pendingIntent)
+
+                    Snackbar.make(binding.root,
+                        "Daily reminders disabled",
+                        Snackbar.LENGTH_SHORT)
+                        .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+                        .show()
+                }
+            } catch (e: Exception) {
+                Log.e("BudgetActivity", "Error managing reminder: ${e.message}")
+            }
         }
 
         // Reminder time button
         binding.btnSetReminderTime.isEnabled = binding.switchDailyReminders.isChecked
+        binding.btnSetReminderTime.alpha = if (binding.switchDailyReminders.isChecked) 1f else 0.5f
         binding.btnSetReminderTime.setOnClickListener {
             showTimePickerDialog()
         }
     }
 
     private fun showTimePickerDialog() {
-        // Implementation for time picker dialog
-        // This would typically use a TimePickerDialog to select reminder time
-        // For now just show a toast message
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Coming Soon")
-            .setMessage("Time picker functionality will be available in the next update.")
-            .setPositiveButton("OK", null)
+        // Get current time from preferences or default to 8:00 PM
+        val defaultHour = prefsManager.getReminderTimeHour()
+        val defaultMinute = prefsManager.getReminderTimeMinute()
+
+        val timePicker = TimePickerDialog(
+            this,
+            { _, hourOfDay, minute ->
+                // Save selected time
+                prefsManager.setReminderTime(hourOfDay, minute)
+
+                // Update reminder schedule
+                val intent = Intent(this, BudgetCheckService::class.java)
+                intent.action = BudgetCheckService.ACTION_SCHEDULE_DAILY_REMINDER
+                startService(intent)
+
+                // Format time for display
+                val timeString = formatTime(hourOfDay, minute)
+                Snackbar.make(binding.root,
+                    "Daily reminder set for $timeString",
+                    Snackbar.LENGTH_SHORT)
+                    .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+                    .show()
+            },
+            defaultHour,
+            defaultMinute,
+            false
+        )
+
+        timePicker.show()
+    }
+
+    private fun formatTime(hour: Int, minute: Int): String {
+        val amPm = if (hour < 12) "AM" else "PM"
+        val hourDisplay = when {
+            hour == 0 -> 12
+            hour > 12 -> hour - 12
+            else -> hour
+        }
+        val minuteDisplay = if (minute < 10) "0$minute" else minute.toString()
+
+        return "$hourDisplay:$minuteDisplay $amPm"
+    }
+
+    private fun showBudgetAddDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_budget, null)
+        val etBudget = dialogView.findViewById<TextInputEditText>(R.id.etBudget)
+        val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+
+        tvDialogTitle.text = "Create Monthly Budget"
+
+        MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .setPositiveButton("Add Budget") { _, _ -> // Changed button text to "Add Budget"
+                try {
+                    val newBudget = etBudget.text.toString().toDoubleOrNull() ?: 0.0
+
+                    if (newBudget > 0) {
+                        // Save the budget
+                        prefsManager.setMonthlyBudget(newBudget)
+
+                        // First fade out no-budget layout
+                        binding.layoutNoBudget.animate()
+                            .alpha(0f)
+                            .setDuration(300)
+                            .withEndAction {
+                                // Refresh UI and fade in budget layout
+                                setupMonthlyBudget()
+                                binding.layoutBudgetSet.alpha = 0f
+                                binding.layoutBudgetSet.animate()
+                                    .alpha(1f)
+                                    .setDuration(300)
+                                    .start()
+
+                                // Check budget status
+                                startService(Intent(this, BudgetCheckService::class.java))
+
+                                // Show success message
+                                showSuccessSnackbar("Budget created!")
+                            }
+                            .start()
+                    } else {
+                        Snackbar.make(binding.root, "Please enter a valid amount", Snackbar.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Snackbar.make(binding.root, "Invalid budget amount", Snackbar.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
             .show()
     }
 
     private fun showBudgetEditDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_budget, null)
         val etBudget = dialogView.findViewById<TextInputEditText>(R.id.etBudget)
+        val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
 
-        // Pre-fill with current budget if any
+        tvDialogTitle.text = "Edit Monthly Budget"
+
+        // Pre-fill with current budget
         val currentBudget = prefsManager.getMonthlyBudget()
-        if (currentBudget > 0) {
-            etBudget.setText(currentBudget.toString())
-        }
+        etBudget.setText(currentBudget.toString())
 
         MaterialAlertDialogBuilder(this)
-            .setTitle("Set Monthly Budget")
             .setView(dialogView)
-            .setPositiveButton("Save") { _, _ ->
+            .setPositiveButton("Save Changes") { _, _ -> // Changed button text to "Save Changes"
                 try {
                     val newBudget = etBudget.text.toString().toDoubleOrNull() ?: 0.0
 
                     if (newBudget > 0) {
                         prefsManager.setMonthlyBudget(newBudget)
-                        setupMonthlyBudget() // Refresh the UI
+
+                        // Refresh with animation
+                        binding.layoutBudgetSet.alpha = 0.5f
+                        binding.layoutBudgetSet.animate()
+                            .alpha(1f)
+                            .setDuration(300)
+                            .withEndAction {
+                                setupMonthlyBudget() // Refresh the UI
+                            }
+                            .start()
+
+                        // Show success message
+                        showSuccessSnackbar("Budget updated!")
 
                         // Check budget status
                         startService(Intent(this, BudgetCheckService::class.java))
+                    } else {
+                        Snackbar.make(binding.root, "Please enter a valid amount", Snackbar.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
-                    AlertDialog.Builder(this)
-                        .setTitle("Error")
-                        .setMessage("Please enter a valid budget amount")
-                        .setPositiveButton("OK", null)
-                        .show()
+                    Snackbar.make(binding.root, "Invalid budget amount", Snackbar.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -253,7 +528,7 @@ class BudgetActivity : AppCompatActivity() {
         val expenseCategories = getExpenseCategories()
         val categoryNames = expenseCategories.map { it.name }.toTypedArray()
 
-        // Setup spinner
+        // Setup spinner with custom colored items
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoryNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
@@ -268,14 +543,36 @@ class BudgetActivity : AppCompatActivity() {
 
                     if (budget > 0) {
                         prefsManager.setCategoryBudget(category, budget)
-                        setupCategoryBudgets() // Refresh the UI
+
+                        // Check if this is the first category budget
+                        val isFirstCategoryBudget = binding.layoutEmptyCategoryBudgets.visibility == View.VISIBLE
+
+                        if (isFirstCategoryBudget) {
+                            // Fade out empty state
+                            binding.layoutEmptyCategoryBudgets.animate()
+                                .alpha(0f)
+                                .setDuration(300)
+                                .withEndAction {
+                                    setupCategoryBudgets() // Refresh the UI
+
+                                    // Fade in RecyclerView
+                                    binding.rvCategoryBudgets.alpha = 0f
+                                    binding.rvCategoryBudgets.animate()
+                                        .alpha(1f)
+                                        .setDuration(300)
+                                        .start()
+                                }
+                                .start()
+                        } else {
+                            setupCategoryBudgets() // Just refresh
+                        }
+
+                        showSuccessSnackbar("Category budget added!")
+                    } else {
+                        Snackbar.make(binding.root, "Please enter a valid amount", Snackbar.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
-                    AlertDialog.Builder(this)
-                        .setTitle("Error")
-                        .setMessage("Please enter a valid budget amount")
-                        .setPositiveButton("OK", null)
-                        .show()
+                    Snackbar.make(binding.root, "Error adding category budget", Snackbar.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel", null)
@@ -302,22 +599,62 @@ class BudgetActivity : AppCompatActivity() {
             .setPositiveButton("Save") { _, _ ->
                 try {
                     val budget = etBudget.text.toString().toDoubleOrNull() ?: 0.0
-                    prefsManager.setCategoryBudget(category, budget)
-                    setupCategoryBudgets() // Refresh the UI
+                    if (budget > 0) {
+                        prefsManager.setCategoryBudget(category, budget)
+                        setupCategoryBudgets() // Refresh the UI
+                        showSuccessSnackbar("Category budget updated!")
+                    } else {
+                        Snackbar.make(binding.root, "Please enter a valid amount", Snackbar.LENGTH_SHORT).show()
+                    }
                 } catch (e: Exception) {
-                    AlertDialog.Builder(this)
-                        .setTitle("Error")
-                        .setMessage("Please enter a valid budget amount")
-                        .setPositiveButton("OK", null)
-                        .show()
+                    Snackbar.make(binding.root, "Error updating category budget", Snackbar.LENGTH_SHORT).show()
                 }
             }
             .setNeutralButton("Delete") { _, _ ->
-                prefsManager.setCategoryBudget(category, 0.0)
-                setupCategoryBudgets() // Refresh the UI
+                confirmDeleteCategoryBudget(category)
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    private fun confirmDeleteCategoryBudget(category: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Delete Category Budget")
+            .setMessage("Are you sure you want to delete the budget for $category?")
+            .setPositiveButton("Delete") { _, _ ->
+                prefsManager.setCategoryBudget(category, 0.0)
+
+                // Check if this was the last category budget
+                val remainingBudgets = getCategoryBudgets().size - 1
+
+                if (remainingBudgets == 0) {
+                    // This was the last category budget
+                    binding.rvCategoryBudgets.animate()
+                        .alpha(0f)
+                        .setDuration(300)
+                        .withEndAction {
+                            setupCategoryBudgets() // Will show empty state
+                        }
+                        .start()
+                } else {
+                    // Still have other budgets
+                    setupCategoryBudgets()
+                }
+
+                Snackbar.make(binding.root, "Category budget deleted", Snackbar.LENGTH_SHORT)
+                    .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+                    .show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showSuccessSnackbar(message: String) {
+        val snackbar = Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT)
+        snackbar.setBackgroundTint(ContextCompat.getColor(this, R.color.success))
+        snackbar.setTextColor(Color.WHITE)
+        snackbar.setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+        snackbar.show()
     }
 
     private fun getCategoryBudgets(): List<CategoryBudget> {
@@ -338,7 +675,7 @@ class BudgetActivity : AppCompatActivity() {
     private fun getExpenseCategories(): List<Category> {
         return listOf(
             Category("food", "Food","Food", R.drawable.ic_category_food, R.color.category_food),
-            Category("transport", "Transport","Transport" ,R.drawable.ic_category_transport, R.color.category_transport),
+            Category("transport", "Transport","Transport", R.drawable.ic_category_transport, R.color.category_transport),
             Category("bills", "Bills","Bills", R.drawable.ic_category_bills, R.color.category_bills),
             Category("entertainment", "Entertainment","Entertainment", R.drawable.ic_category_entertainment, R.color.category_entertainment),
             Category("shopping", "Shopping","Shopping", R.drawable.ic_category_shopping, R.color.category_shopping),
@@ -350,9 +687,41 @@ class BudgetActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            finish()
+            // Add exit animation
+            finishWithAnimation()
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun finishWithAnimation() {
+        // Apply exit animations to cards
+        binding.cardMonthlyBudget.animate()
+            .alpha(0f)
+            .translationY(-50f)
+            .setDuration(300)
+            .start()
+
+        binding.categoryBudgetsHeader.animate()
+            .alpha(0f)
+            .setDuration(200)
+            .setStartDelay(100)
+            .start()
+
+        binding.notificationCard.animate()
+            .alpha(0f)
+            .translationY(50f)
+            .setDuration(300)
+            .setStartDelay(200)
+            .withEndAction {
+                finish()
+                overridePendingTransition(R.anim.fade_in, R.anim.slide_down)
+            }
+            .start()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finishWithAnimation()
     }
 }

@@ -52,6 +52,7 @@ dependencies {
     implementation (libs.mpandroidchart)
     implementation (libs.androidx.preference.ktx)
     implementation(libs.androidx.foundation.android)
+    implementation (libs.opencsv)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

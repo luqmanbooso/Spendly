@@ -11,7 +11,6 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.example.spendly.AddTransactionActivity
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -26,12 +25,6 @@ class NotificationHelper(private val context: Context) {
         const val NOTIFICATION_ID_BUDGET_WARNING = 1001
         const val NOTIFICATION_ID_BUDGET_EXCEEDED = 1002
         const val NOTIFICATION_ID_DAILY_REMINDER = 1003
-
-        // Specific date and login for the user
-        private val SPECIFIC_DATE = Calendar.getInstance().apply {
-            timeInMillis = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-                .parse("2025-04-22 06:16:31")?.time ?: System.currentTimeMillis()
-        }
 
         // User information
         const val USER_LOGIN = "luqmanbooso"
@@ -73,7 +66,7 @@ class NotificationHelper(private val context: Context) {
     }
 
     fun showBudgetWarningNotification(percentSpent: Int) {
-        val intent = Intent(context, MainActivity::class.java)
+        val intent = Intent(context, BudgetActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             context,
             0,
@@ -81,25 +74,41 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // Create action button to add transaction
+        val addTransactionIntent = Intent(context, AddTransactionActivity::class.java)
+        val addTransactionPendingIntent = PendingIntent.getActivity(
+            context,
+            1,
+            addTransactionIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // FIXED: Use system icon instead of mipmap to avoid decoder error
         val notification = NotificationCompat.Builder(context, CHANNEL_BUDGET_ALERTS)
-            .setSmallIcon(R.drawable.ic_notifications)
+            .setSmallIcon(android.R.drawable.stat_sys_warning) // Use system icon instead
+            // .setLargeIcon() removed to avoid decoder issues
             .setContentTitle("Budget Warning")
             .setContentText("You've used $percentSpent% of your monthly budget")
             .setStyle(NotificationCompat.BigTextStyle()
                 .bigText("You've used $percentSpent% of your monthly budget. Consider reducing spending for the rest of the month."))
             .setSubText(USER_LOGIN)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setColor(context.getColor(R.color.primary))
             .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_input_add, "Add Transaction", addTransactionPendingIntent) // Use system icon
             .setAutoCancel(true)
             .build()
 
         try {
-            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS)
-                == PackageManager.PERMISSION_GRANTED || Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (checkNotificationPermission()) {
                 NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_BUDGET_WARNING, notification)
+                Log.d(TAG, "Budget warning notification dispatched with system icon")
+            } else {
+                Log.e(TAG, "Cannot show notification: Permission not granted")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error showing notification: ${e.message}")
+            Log.e(TAG, "Error showing notification: ${e.message}", e)
         }
     }
 
@@ -114,25 +123,31 @@ class NotificationHelper(private val context: Context) {
 
         val exceededAmount = CurrencyFormatter.formatAmount(amountExceeded, currencySymbol)
 
+        // FIXED: Use system icon instead of mipmap to avoid decoder error
         val notification = NotificationCompat.Builder(context, CHANNEL_BUDGET_ALERTS)
-            .setSmallIcon(R.drawable.ic_notifications)
+            .setSmallIcon(android.R.drawable.stat_notify_error) // Use system icon instead
+            // .setLargeIcon() removed to avoid decoder issues
             .setContentTitle("Budget Exceeded!")
             .setContentText("You've exceeded your monthly budget by $exceededAmount")
             .setStyle(NotificationCompat.BigTextStyle()
-                .bigText("You've exceeded your monthly budget by $exceededAmount. It's time to review your spending."))
+                .bigText("You've exceeded your monthly budget by $exceededAmount. It's time to review your spending and adjust your budget."))
             .setSubText(USER_LOGIN)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setColor(context.getColor(R.color.expense)) // Use expense color for urgency
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 
         try {
-            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS)
-                == PackageManager.PERMISSION_GRANTED || Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (checkNotificationPermission()) {
                 NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_BUDGET_EXCEEDED, notification)
+                Log.d(TAG, "Budget exceeded notification dispatched with system icon")
+            } else {
+                Log.e(TAG, "Cannot show notification: Permission not granted")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error showing notification: ${e.message}")
+            Log.e(TAG, "Error showing notification: ${e.message}", e)
         }
     }
 
@@ -147,25 +162,43 @@ class NotificationHelper(private val context: Context) {
 
         // Format current date
         val dateFormat = SimpleDateFormat("EEEE, MMM dd", Locale.getDefault())
-        val formattedDate = dateFormat.format(SPECIFIC_DATE.time)
+        val formattedDate = dateFormat.format(Date())
 
+        // FIXED: Use system icon instead of mipmap to avoid decoder error
         val notification = NotificationCompat.Builder(context, CHANNEL_DAILY_REMINDERS)
-            .setSmallIcon(R.drawable.ic_notifications)
+            .setSmallIcon(R.drawable.ic_launcher) // Use system icon instead
+            // .setLargeIcon() removed to avoid decoder issues
             .setContentTitle("Track Today's Expenses")
             .setContentText("Don't forget to record your expenses for $formattedDate")
             .setSubText(USER_LOGIN)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setColor(context.getColor(R.color.primary))
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 
         try {
-            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS)
-                == PackageManager.PERMISSION_GRANTED || Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (checkNotificationPermission()) {
                 NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_DAILY_REMINDER, notification)
+                Log.d(TAG, "Daily reminder notification dispatched with system icon")
+            } else {
+                Log.e(TAG, "Cannot show notification: Permission not granted")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error showing notification: ${e.message}")
+            Log.e(TAG, "Error showing notification: ${e.message}", e)
         }
+    }
+
+    private fun checkNotificationPermission(): Boolean {
+        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED
+        } else {
+            true // For lower Android versions, no runtime permission needed
+        }
+
+        Log.d(TAG, "Notification permission status: $hasPermission")
+        return hasPermission
     }
 }

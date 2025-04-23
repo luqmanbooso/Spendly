@@ -74,19 +74,8 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Create action button to add transaction
-        val addTransactionIntent = Intent(context, AddTransactionActivity::class.java)
-        val addTransactionPendingIntent = PendingIntent.getActivity(
-            context,
-            1,
-            addTransactionIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // FIXED: Use system icon instead of mipmap to avoid decoder error
         val notification = NotificationCompat.Builder(context, CHANNEL_BUDGET_ALERTS)
-            .setSmallIcon(android.R.drawable.stat_sys_warning) // Use system icon instead
-            // .setLargeIcon() removed to avoid decoder issues
+            .setSmallIcon(android.R.drawable.stat_sys_warning)
             .setContentTitle("Budget Warning")
             .setContentText("You've used $percentSpent% of your monthly budget")
             .setStyle(NotificationCompat.BigTextStyle()
@@ -96,7 +85,6 @@ class NotificationHelper(private val context: Context) {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setColor(context.getColor(R.color.primary))
             .setContentIntent(pendingIntent)
-            .addAction(android.R.drawable.ic_input_add, "Add Transaction", addTransactionPendingIntent) // Use system icon
             .setAutoCancel(true)
             .build()
 
@@ -115,27 +103,34 @@ class NotificationHelper(private val context: Context) {
     fun showBudgetExceededNotification(amountExceeded: Double, currencySymbol: String) {
         val intent = Intent(context, BudgetActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
+            context, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Add special intent for budget adjustment
+        val adjustBudgetIntent = Intent(context, BudgetActivity::class.java).apply {
+            putExtra("ADJUST_BUDGET", true)
+            putExtra("EXCEEDED_AMOUNT", amountExceeded)
+        }
+        val adjustBudgetPendingIntent = PendingIntent.getActivity(
+            context, 1, adjustBudgetIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val exceededAmount = CurrencyFormatter.formatAmount(amountExceeded, currencySymbol)
 
-        // FIXED: Use system icon instead of mipmap to avoid decoder error
         val notification = NotificationCompat.Builder(context, CHANNEL_BUDGET_ALERTS)
-            .setSmallIcon(android.R.drawable.stat_notify_error) // Use system icon instead
-            // .setLargeIcon() removed to avoid decoder issues
+            .setSmallIcon(android.R.drawable.stat_notify_error)
             .setContentTitle("Budget Exceeded!")
             .setContentText("You've exceeded your monthly budget by $exceededAmount")
             .setStyle(NotificationCompat.BigTextStyle()
-                .bigText("You've exceeded your monthly budget by $exceededAmount. It's time to review your spending and adjust your budget."))
+                .bigText("You've exceeded your monthly budget by $exceededAmount. Tap 'Adjust Budget' to update your monthly budget."))
             .setSubText(USER_LOGIN)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setColor(context.getColor(R.color.expense)) // Use expense color for urgency
+            .setColor(context.getColor(R.color.expense))
             .setContentIntent(pendingIntent)
+            .addAction(android.R.drawable.ic_menu_edit, "Adjust Budget", adjustBudgetPendingIntent)
             .setAutoCancel(true)
             .build()
 
@@ -150,7 +145,6 @@ class NotificationHelper(private val context: Context) {
             Log.e(TAG, "Error showing notification: ${e.message}", e)
         }
     }
-
     fun showDailyReminderNotification() {
         val intent = Intent(context, AddTransactionActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(

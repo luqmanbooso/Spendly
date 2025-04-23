@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -69,6 +70,8 @@ class AnalysisActivity : AppCompatActivity() {
     // Storage permission request code
     private val STORAGE_PERMISSION_CODE = 101
     private val WRITE_PERMISSION_CODE = 102
+
+    private var lastExportType: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -231,6 +234,7 @@ class AnalysisActivity : AppCompatActivity() {
 
     private fun setupExportButtons() {
         binding.btnExportCsv.setOnClickListener {
+            lastExportType = "CSV"
             if (checkStoragePermission()) {
                 exportTransactionsToCSV()
             } else {
@@ -239,6 +243,7 @@ class AnalysisActivity : AppCompatActivity() {
         }
 
         binding.btnExportPdf.setOnClickListener {
+            lastExportType = "PDF"
             if (checkStoragePermission()) {
                 exportTransactionsToPDF()
             } else {
@@ -728,8 +733,7 @@ class AnalysisActivity : AppCompatActivity() {
             val fileName = "spendly_transactions_${timestamp}.csv"
             val csvFile = File(csvFolder, fileName)
 
-            val success = exportTransactionsToCSV(transactions, csvFile)
-
+            val success = backupHelper.exportTransactionsToCSV(transactions, csvFile)
             if (success) {
                 // Share the CSV file
                 val fileUri = FileProvider.getUriForFile(
@@ -986,25 +990,24 @@ class AnalysisActivity : AppCompatActivity() {
             .show()
     }
 
-
     private fun checkStoragePermission(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            return Environment.isExternalStorageManager()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
         } else {
             val write = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             val read = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-            return write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED
+            write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED
         }
     }
 
     private fun requestStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             try {
-                val intent = Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
                 intent.data = Uri.parse("package:$packageName")
                 startActivityForResult(intent, STORAGE_PERMISSION_CODE)
             } catch (e: Exception) {
-                val intent = Intent(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
                 startActivityForResult(intent, STORAGE_PERMISSION_CODE)
             }
         } else {
@@ -1016,6 +1019,44 @@ class AnalysisActivity : AppCompatActivity() {
                 ),
                 WRITE_PERMISSION_CODE
             )
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    // Permission granted, proceed with export
+                    if (lastExportType == "CSV") {
+                        exportTransactionsToCSV()
+                    } else {
+                        exportTransactionsToPDF()
+                    }
+                } else {
+                    showSnackbar("Storage permission is required to export files")
+                }
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == WRITE_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, proceed with export
+                if (lastExportType == "CSV") {
+                    exportTransactionsToCSV()
+                } else {
+                    exportTransactionsToPDF()
+                }
+            } else {
+                showSnackbar("Storage permission is required to export files")
+            }
         }
     }
 

@@ -9,10 +9,9 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="100dp"
         android:paddingTop="24dp"
-        android:background="@color/primary"
-        app:liftOnScroll="true"
+        android:background="@color/white"
         android:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
@@ -21,7 +20,7 @@
             android:layout_height="?attr/actionBarSize"
             app:titleTextAppearance="@style/TextAppearance.Toolbar.Title"
             app:titleCentered="true"
-            app:titleTextColor="@color/white" />
+            app:titleTextColor="@color/text_primary" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -54,12 +53,12 @@
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Spending Analysis" />
+                    android:text="@string/analysis_title" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reports" />
+                    android:text="@string/reports_title" />
             </com.google.android.material.tabs.TabLayout>
 
             <!-- Period Selection with smooth scroll -->
@@ -172,7 +171,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:fontFamily="@font/poppins_medium"
-                            android:text="Category Breakdown"
+                            android:text="@string/category_breakdown"
                             android:textColor="@color/text_primary"
                             android:textSize="18sp" />
 
@@ -214,11 +213,12 @@
                             android:src="@drawable/ic_empty_data" />
 
                         <TextView
+                            android:id="@+id/tvEmptyMessage"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins_medium"
                             android:gravity="center"
-                            android:text="No data for this period"
+                            android:text="@string/no_data_message"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp" />
 
@@ -228,7 +228,7 @@
                             android:layout_marginTop="8dp"
                             android:fontFamily="@font/poppins"
                             android:gravity="center"
-                            android:text="Try selecting a different time period or add more transactions"
+                            android:text="@string/no_data_hint"
                             android:textColor="@color/text_secondary"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -259,7 +259,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="24dp"
                             android:fontFamily="@font/poppins_medium"
-                            android:text="Top Categories"
+                            android:text="@string/top_categories"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp" />
 
@@ -305,7 +305,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_medium"
-                        android:text="Financial Summary"
+                        android:text="@string/financial_summary"
                         android:textColor="@color/text_primary"
                         android:textSize="18sp" />
 
@@ -336,7 +336,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins"
-                                android:text="Income"
+                                android:text="@string/income"
                                 android:drawableStart="@drawable/ic_income"
                                 android:drawablePadding="4dp"
                                 android:gravity="center"
@@ -373,7 +373,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins"
-                                android:text="Expense"
+                                android:text="@string/expense"
                                 android:drawableStart="@drawable/ic_budget"
                                 android:drawablePadding="4dp"
                                 android:gravity="center"
@@ -406,7 +406,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins_medium"
-                            android:text="NET BALANCE"
+                            android:text="@string/net_balance"
                             android:drawableStart="@drawable/ic_category_bills"
                             android:drawablePadding="8dp"
                             android:textColor="@color/text_primary"
@@ -450,7 +450,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_medium"
-                        android:text="Export Data"
+                        android:text="@string/export_data"
                         android:textColor="@color/text_primary"
                         android:textSize="18sp" />
 
@@ -458,7 +458,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins"
-                        android:text="Export your financial data for the selected period"
+                        android:text="@string/export_data_description"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
@@ -476,7 +476,7 @@
                             android:layout_weight="1"
                             android:backgroundTint="@color/primary"
                             android:padding="12dp"
-                            android:text="Export as CSV"
+                            android:text="@string/export_csv"
                             android:textAllCaps="false"
                             app:cornerRadius="8dp"
                             app:icon="@drawable/ic_csv"
@@ -491,7 +491,7 @@
                             android:layout_weight="1"
                             android:backgroundTint="@color/expense"
                             android:padding="12dp"
-                            android:text="Export as PDF"
+                            android:text="@string/export_pdf"
                             android:textAllCaps="false"
                             app:cornerRadius="8dp"
                             app:icon="@drawable/ic_pdf"

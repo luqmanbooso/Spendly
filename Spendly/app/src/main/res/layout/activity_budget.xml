@@ -62,7 +62,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:fontFamily="@font/poppins_medium"
-                            android:text="Monthly Budget"
+                            android:text="@string/monthly_budget"
                             android:textColor="@color/text_primary"
                             android:textSize="18sp" />
 
@@ -76,7 +76,7 @@
                                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Edit"
+                                android:text="@string/edit"
                                 android:textColor="@color/primary"
                                 app:strokeColor="@color/primary" />
 
@@ -150,7 +150,7 @@
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins"
                                 android:gravity="end"
-                                android:text="No budget set"
+                                android:text="@string/no_budget_status"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="14sp" />
                         </LinearLayout>
@@ -176,7 +176,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/poppins"
-                                    android:text="Spent"
+                                    android:text="@string/spent"
                                     android:textColor="@color/text_secondary"
                                     android:textSize="12sp" />
 
@@ -200,7 +200,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/poppins"
-                                    android:text="Remaining"
+                                    android:text="@string/remaining"
                                     android:textColor="@color/text_secondary"
                                     android:textSize="12sp" />
 
@@ -238,7 +238,7 @@
                             android:layout_marginTop="8dp"
                             android:fontFamily="@font/poppins_medium"
                             android:gravity="center"
-                            android:text="No Budget Set"
+                            android:text="@string/no_budget_set"
                             android:textColor="@color/text_primary"
                             android:textSize="18sp" />
 
@@ -249,7 +249,7 @@
                             android:layout_marginTop="8dp"
                             android:fontFamily="@font/poppins"
                             android:gravity="center"
-                            android:text="Set up your monthly budget to start tracking your spending"
+                            android:text="@string/no_budget_hint"
                             android:textColor="@color/text_secondary"
                             android:textSize="14sp" />
 
@@ -259,7 +259,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
-                            android:text="Set Budget Now"
+                            android:text="@string/set_budget_now"
                             android:backgroundTint="@color/primary"
                             app:icon="@drawable/ic_add" />
                     </LinearLayout>
@@ -281,7 +281,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/poppins_medium"
-                    android:text="Category Budgets"
+                    android:text="@string/category_budgets"
                     android:textColor="@color/text_primary"
                     android:textSize="18sp" />
 
@@ -290,7 +290,7 @@
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add"
+                    android:text="@string/add"
                     android:textColor="@color/primary"
                     app:icon="@drawable/ic_add"
                     app:iconTint="@color/primary"
@@ -323,7 +323,7 @@
                     android:layout_width="120dp"
                     android:layout_height="120dp"
                     android:layout_margin="16dp"
-                    android:src="@drawable/ic_empty_categories"
+                    android:src="@drawable/ic_empty_transactions"
                     app:tint="@color/text_secondary" />
 
                 <TextView
@@ -331,7 +331,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/poppins_medium"
                     android:gravity="center"
-                    android:text="No Category Budgets"
+                    android:text="@string/no_category_budgets"
                     android:textColor="@color/text_primary"
                     android:textSize="18sp" />
 
@@ -341,137 +341,18 @@
                     android:layout_marginTop="8dp"
                     android:fontFamily="@font/poppins"
                     android:gravity="center"
-                    android:text="Set budgets for specific spending categories to track more effectively"
+                    android:text="@string/no_category_budgets_hint"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
 
-                <!-- Fix: Change ID to btnAddFirstCategoryBudget instead of duplicating btnCreateBudget -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAddFirstCategoryBudget"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Add Category Budget"
+                    android:text="@string/add_category_budget"
                     app:icon="@drawable/ic_add" />
             </LinearLayout>
-
-            <!-- Notification Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/notificationCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/poppins_medium"
-                        android:text="Notifications"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp" />
-
-                    <!-- Budget Alerts -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="@font/poppins_medium"
-                                android:text="Budget Alerts"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="@font/poppins"
-                                android:text="Get notified when you're approaching your budget limit"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchBudgetAlerts"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="16dp"
-                        android:background="@color/primary_dark" />
-
-                    <!-- Daily Reminders -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="@font/poppins_medium"
-                                android:text="Daily Reminders"
-                                android:textColor="@color/text_primary"
-                                android:textSize="16sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="@font/poppins"
-                                android:text="Get reminded to track your expenses every day"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchDailyReminders"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSetReminderTime"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:enabled="false"
-                        android:text="Set reminder time"
-                        android:textColor="@color/primary"
-                        app:icon="@drawable/ic_time"
-                        app:iconTint="@color/primary" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

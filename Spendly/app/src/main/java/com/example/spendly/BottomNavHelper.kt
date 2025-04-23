@@ -9,6 +9,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.animation.ValueAnimator
+import android.view.animation.AnimationUtils
 import com.example.spendly.AddTransactionActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -108,26 +110,24 @@ class BottomNavHelper(private val context: Context, private val rootView: View) 
                 return
             }
 
-            val colorId = if (isActive) R.color.primary else R.color.text_secondary
-            val color = context.getColor(colorId)
+            val startColor = if (isActive) context.getColor(R.color.text_secondary) else context.getColor(R.color.primary)
+            val endColor = if (isActive) context.getColor(R.color.primary) else context.getColor(R.color.text_secondary)
 
-            icon.setColorFilter(color)
-            text.setTextColor(color)
+            // Animate color change
+            val colorAnimator = ValueAnimator.ofArgb(startColor, endColor)
+            colorAnimator.duration = 200
+            colorAnimator.addUpdateListener { animation ->
+                val animatedColor = animation.animatedValue as Int
+                icon.setColorFilter(animatedColor)
+                text.setTextColor(animatedColor)
+            }
+            colorAnimator.start()
 
-            // Add animation if active
+            // Apply bounce animation if active
             if (isActive) {
-                icon.animate()
-                    .scaleX(1.2f)
-                    .scaleY(1.2f)
-                    .setDuration(200)
-                    .withEndAction {
-                        icon.animate()
-                            .scaleX(1.0f)
-                            .scaleY(1.0f)
-                            .setDuration(100)
-                            .start()
-                    }
-                    .start()
+                val bounceAnim = AnimationUtils.loadAnimation(context, R.anim.nav_bounce)
+                icon.startAnimation(bounceAnim)
+                text.startAnimation(bounceAnim)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error setting nav item state for $labelText: ${e.message}")
@@ -159,6 +159,12 @@ class BottomNavHelper(private val context: Context, private val rootView: View) 
             val intent = Intent(context, activityClass)
             intent.flags = Intent.FLAG_ACTIVITY_NO_ANIMATION
             context.startActivity(intent)
+            
+            // Apply exit animation
+            (context as? Activity)?.overridePendingTransition(
+                R.anim.fab_scale_down,
+                R.anim.fab_scale_up
+            )
             (context as? Activity)?.finish()
         } catch (e: Exception) {
             Log.e(TAG, "Error navigating to ${activityClass.simpleName}: ${e.message}")

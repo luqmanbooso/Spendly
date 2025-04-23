@@ -19,25 +19,12 @@ class BootReceiver : BroadcastReceiver() {
             try {
                 val prefsManager = PrefsManager(context)
 
-                // Need to ensure we're starting these properly
-                if (prefsManager.shouldNotifyBudgetWarning() || prefsManager.shouldShowDailyReminders()) {
-                    // Single foreground service call for everything
-                    val serviceIntent = Intent(context, BudgetCheckService::class.java).apply {
-                        // Use a single action - we'll check both in the service
-                        action = BudgetCheckService.ACTION_CHECK_BUDGET
-                        putExtra(BudgetCheckService.EXTRA_START_AS_FOREGROUND, true)
-                        putExtra("CHECK_BUDGET", prefsManager.shouldNotifyBudgetWarning())
-                        putExtra("CHECK_REMINDERS", prefsManager.shouldShowDailyReminders())
+                if (prefsManager.shouldShowDailyReminders()) {
+                    val reminderIntent = Intent(context, BudgetCheckService::class.java).apply {
+                        action = BudgetCheckService.ACTION_SCHEDULE_DAILY_REMINDER
                     }
-
-                    // Always use startForegroundService for boot completion
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        Log.d(TAG, "Starting foreground service after boot")
-                        context.startForegroundService(serviceIntent)
-                    } else {
-                        Log.d(TAG, "Starting normal service after boot")
-                        context.startService(serviceIntent)
-                    }
+                    startServiceSafely(context, reminderIntent)
+                    Log.d(TAG, "Daily reminder scheduled after boot")
                 }
 
                 Log.d(TAG, "Boot initialization complete for user: ${NotificationHelper.USER_LOGIN}")

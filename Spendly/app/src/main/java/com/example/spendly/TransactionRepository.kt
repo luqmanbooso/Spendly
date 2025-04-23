@@ -3,11 +3,14 @@ package com.example.spendly
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.SimpleDateFormat
 import java.util.*
 
 class TransactionRepository(private val context: Context) {
 
     private val sharedPreferences = context.getSharedPreferences(TRANSACTION_PREFS, Context.MODE_PRIVATE)
+    private val calendarCache = ThreadLocal<Calendar>()
+    private val dateFormatCache = ThreadLocal<SimpleDateFormat>()
 
     fun saveTransaction(transaction: Transaction) {
         val transactions = getAllTransactions().toMutableList()
@@ -134,14 +137,17 @@ class TransactionRepository(private val context: Context) {
     }
 
     fun getTotalIncomeForCurrentMonth(): Double {
-        val calendar = Calendar.getInstance()
+        // Get calendar instance from cache or create new one
+        val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+        calendar.timeInMillis = System.currentTimeMillis()
         val currentMonth = calendar.get(Calendar.MONTH)
         val currentYear = calendar.get(Calendar.YEAR)
 
         return getAllTransactions()
             .filter { it.isIncome }
             .filter {
-                val transactionDate = Calendar.getInstance().apply { timeInMillis = it.date }
+                val transactionDate = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+                transactionDate.timeInMillis = it.date
                 transactionDate.get(Calendar.MONTH) == currentMonth &&
                         transactionDate.get(Calendar.YEAR) == currentYear
             }
@@ -149,14 +155,17 @@ class TransactionRepository(private val context: Context) {
     }
 
     fun getTotalExpenseForCurrentMonth(): Double {
-        val calendar = Calendar.getInstance()
+        // Get calendar instance from cache or create new one
+        val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+        calendar.timeInMillis = System.currentTimeMillis()
         val currentMonth = calendar.get(Calendar.MONTH)
         val currentYear = calendar.get(Calendar.YEAR)
 
         return getAllTransactions()
             .filter { !it.isIncome }
             .filter {
-                val transactionDate = Calendar.getInstance().apply { timeInMillis = it.date }
+                val transactionDate = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+                transactionDate.timeInMillis = it.date
                 transactionDate.get(Calendar.MONTH) == currentMonth &&
                         transactionDate.get(Calendar.YEAR) == currentYear
             }
@@ -165,7 +174,9 @@ class TransactionRepository(private val context: Context) {
 
     // Add method to get expense by category for analysis
     fun getExpensesByCategory(): Map<String, Double> {
-        val calendar = Calendar.getInstance()
+        // Get calendar instance from cache or create new one
+        val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+        calendar.timeInMillis = System.currentTimeMillis()
         val currentMonth = calendar.get(Calendar.MONTH)
         val currentYear = calendar.get(Calendar.YEAR)
 
@@ -174,7 +185,8 @@ class TransactionRepository(private val context: Context) {
         getAllTransactions()
             .filter { !it.isIncome }
             .filter {
-                val transactionDate = Calendar.getInstance().apply { timeInMillis = it.date }
+                val transactionDate = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+                transactionDate.timeInMillis = it.date
                 transactionDate.get(Calendar.MONTH) == currentMonth &&
                         transactionDate.get(Calendar.YEAR) == currentYear
             }
@@ -209,7 +221,7 @@ class TransactionRepository(private val context: Context) {
 
     // For chart data - weekly
     fun getWeeklyData(numberOfWeeks: Int): List<WeeklyData> {
-        val calendar = Calendar.getInstance()
+        val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         val result = mutableListOf<WeeklyData>()
 
         // Start from current week and go back
@@ -247,7 +259,7 @@ class TransactionRepository(private val context: Context) {
 
     // For chart data - monthly
     fun getMonthlyData(numberOfMonths: Int): List<MonthlyData> {
-        val calendar = Calendar.getInstance()
+        val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         val result = mutableListOf<MonthlyData>()
 
         for (i in 0 until numberOfMonths) {
@@ -293,7 +305,8 @@ class TransactionRepository(private val context: Context) {
     }
     // Overloaded method to get weekly data with custom date range
     fun getWeeklyData(numberOfWeeks: Int, startDate: Long, endDate: Long): List<WeeklyData> {
-        val calendar = Calendar.getInstance().apply { timeInMillis = endDate }
+        val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+        calendar.timeInMillis = endDate
         val result = mutableListOf<WeeklyData>()
         val minDate = startDate
 
@@ -304,7 +317,7 @@ class TransactionRepository(private val context: Context) {
             }
 
             // Calculate current week's end date
-            val endOfWeek = calendar.timeInMillis.coerceAtMost(endDate)  // Fixed typo: removed the 's'
+            val endOfWeek = calendar.timeInMillis.coerceAtMost(endDate)
 
             // Set to first day of the week
             calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
@@ -345,7 +358,8 @@ class TransactionRepository(private val context: Context) {
 
     // Overloaded method to get monthly data with custom date range
     fun getMonthlyData(numberOfMonths: Int, startDate: Long, endDate: Long): List<MonthlyData> {
-        val calendar = Calendar.getInstance().apply { timeInMillis = endDate }
+        val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+        calendar.timeInMillis = endDate
         val result = mutableListOf<MonthlyData>()
         val minDate = startDate
 
@@ -404,14 +418,17 @@ class TransactionRepository(private val context: Context) {
     }
 
     fun getExpenseForCategory(category: String): Double {
-        val calendar = Calendar.getInstance()
+        // Get calendar instance from cache or create new one
+        val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+        calendar.timeInMillis = System.currentTimeMillis()
         val currentMonth = calendar.get(Calendar.MONTH)
         val currentYear = calendar.get(Calendar.YEAR)
 
         return getAllTransactions()
             .filter { !it.isIncome && it.category.equals(category, ignoreCase = true) }
             .filter {
-                val transactionDate = Calendar.getInstance().apply { timeInMillis = it.date }
+                val transactionDate = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
+                transactionDate.timeInMillis = it.date
                 transactionDate.get(Calendar.MONTH) == currentMonth &&
                         transactionDate.get(Calendar.YEAR) == currentYear
             }
@@ -420,7 +437,6 @@ class TransactionRepository(private val context: Context) {
 
     // For file backup/restore (internal storage)
     fun exportToJson(): String {
-        val transactions = getAllTransactions()
         return sharedPreferences.getString(KEY_TRANSACTIONS, "[]") ?: "[]"
     }
 

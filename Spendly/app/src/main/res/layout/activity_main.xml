@@ -708,9 +708,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="2dp"
-                    app:cardBackgroundColor="@color/white">
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="#00FFFFFF">
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvRecentTransactions"
@@ -719,7 +718,6 @@
                         android:clipToPadding="false"
                         android:nestedScrollingEnabled="false"
                         android:overScrollMode="never"
-                        android:paddingVertical="8dp"
                         tools:itemCount="3"
                         tools:listitem="@layout/item_transaction" />
                 </androidx.cardview.widget.CardView>

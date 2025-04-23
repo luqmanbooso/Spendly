@@ -56,7 +56,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_medium"
-                        android:text="Transaction Summary"
+                        android:text="@string/transaction_summary"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp" />
 
@@ -82,7 +82,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins"
-                                android:text="Income"
+                                android:text="@string/income"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
 
@@ -107,7 +107,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins"
-                                android:text="Expense"
+                                android:text="@string/expense"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
 
@@ -132,7 +132,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/poppins"
-                                android:text="Balance"
+                                android:text="@string/balance"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="12sp" />
 
@@ -175,7 +175,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins_medium"
-                            android:text="Show"
+                            android:text="@string/show"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp" />
 
@@ -189,7 +189,7 @@
                             style="@style/Widget.MaterialComponents.Button.TextButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Date Range"
+                            android:text="@string/date_range"
                             android:textColor="@color/primary"
                             app:icon="@drawable/ic_calendar"
                             app:iconTint="@color/primary" />
@@ -214,28 +214,28 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:checked="true"
-                                android:text="All" />
+                                android:text="@string/all" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipIncome"
                                 style="@style/Widget.MaterialComponents.Chip.Choice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Income" />
+                                android:text="@string/income" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipExpense"
                                 style="@style/Widget.MaterialComponents.Chip.Choice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Expense" />
+                                android:text="@string/expense" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipCategory"
                                 style="@style/Widget.MaterialComponents.Chip.Choice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="By Category" />
+                                android:text="@string/by_category" />
                         </com.google.android.material.chip.ChipGroup>
                     </HorizontalScrollView>
 
@@ -256,7 +256,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
-                            android:text="Start Date"
+                            android:text="@string/start_date"
                             app:icon="@drawable/ic_calendar" />
 
                         <com.google.android.material.button.MaterialButton
@@ -265,7 +265,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="End Date"
+                            android:text="@string/end_date"
                             app:icon="@drawable/ic_calendar" />
                     </LinearLayout>
 
@@ -284,7 +284,7 @@
                             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Select Category"
+                            android:text="@string/select_category"
                             app:icon="@drawable/ic_category_other" />
                     </LinearLayout>
                 </LinearLayout>
@@ -305,7 +305,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/poppins_medium"
-                    android:text="Recent Transactions"
+                    android:text="@string/recent_transactions"
                     android:textColor="@color/text_primary"
                     android:textSize="18sp" />
 
@@ -314,7 +314,7 @@
                     style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add New"
+                    android:text="@string/add_new"
                     android:textSize="12sp"
                     app:icon="@drawable/ic_add"
                     app:cornerRadius="20dp" />
@@ -348,7 +348,7 @@
                 <ImageView
                     android:layout_width="180dp"
                     android:layout_height="180dp"
-                    android:src="@drawable/ic_empty_categories"
+                    android:src="@drawable/ic_empty_transactions"
                     app:tint="@color/text_secondary"
                     android:contentDescription="No transactions" />
 
@@ -359,7 +359,7 @@
                     android:layout_marginTop="16dp"
                     android:fontFamily="@font/poppins_medium"
                     android:gravity="center"
-                    android:text="No Transactions Yet"
+                    android:text="@string/no_transactions_yet"
                     android:textColor="@color/text_primary"
                     android:textSize="18sp" />
 
@@ -371,7 +371,7 @@
                     android:layout_marginTop="8dp"
                     android:fontFamily="@font/poppins"
                     android:gravity="center"
-                    android:text="Add your first transaction to start tracking your finances"
+                    android:text="@string/no_transactions_hint"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
 
@@ -380,7 +380,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Add Transaction"
+                    android:text="@string/add_transaction"
                     app:icon="@drawable/ic_add" />
             </LinearLayout>
         </LinearLayout>

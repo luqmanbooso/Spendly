@@ -46,17 +46,12 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        // Initialize repositories and managers
         prefsManager = PrefsManager(this)
         transactionRepository = TransactionRepository(this)
         bottomNavHelper = BottomNavHelper(this, binding.root)
         btnSettings = findViewById(R.id.btnSettings)
         bottomNavHelper.setupBottomNav(NavSection.HOME)
-        tvUserName = findViewById(R.id.tvUserName) // Added user name TextView
-
-//        findViewById<Button>(R.id.btnTestNotification).setOnClickListener {
-//            testNotificationDirectly()
-//        }
+        tvUserName = findViewById(R.id.tvUserName)
 
         btnSettings.setOnClickListener {
             openSettings()
@@ -66,37 +61,31 @@ class MainActivity : AppCompatActivity() {
             requestNotificationPermission()
         }
 
-        // Set the current month in the header
         val monthFormatter = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
         binding.tvCurrentMonth.text = monthFormatter.format(Date())
 
-        // Set up UI
         setupDashboard()
         setupRecentTransactions()
 
         checkBudgetAndScheduleReminders()
-
     }
 
     override fun onResume() {
         super.onResume()
-        // Refresh data when returning to this activity
         setupDashboard()
         setupRecentTransactions()
     }
 
     private fun requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= 33) { // Android 13 is API 33
-            // FIXED: Use correct permission constant
+        if (Build.VERSION.SDK_INT >= 33) {
             val hasPermission = ContextCompat.checkSelfPermission(
                 this,
-                "android.permission.POST_NOTIFICATIONS" // Use string directly to avoid compile errors
+                "android.permission.POST_NOTIFICATIONS"
             ) == PackageManager.PERMISSION_GRANTED
 
             Log.d(TAG, "Notification permission already granted: $hasPermission")
 
             if (!hasPermission) {
-                // Request the permission - use the string constant directly
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf("android.permission.POST_NOTIFICATIONS"),
@@ -115,7 +104,6 @@ class MainActivity : AppCompatActivity() {
     private fun setupDashboard() {
         val currencySymbol = prefsManager.getCurrencySymbol()
 
-        // Update income, expense and balance
         val totalIncome = transactionRepository.getTotalIncomeForCurrentMonth()
         val totalExpense = transactionRepository.getTotalExpenseForCurrentMonth()
         val balance = totalIncome - totalExpense
@@ -126,7 +114,6 @@ class MainActivity : AppCompatActivity() {
         binding.tvTotalExpense.text = CurrencyFormatter.formatAmount(totalExpense, currencySymbol)
         binding.tvBalance.text = CurrencyFormatter.formatAmount(balance, currencySymbol)
 
-        // Update balance status message
         if (balance < 0) {
             binding.tvBalanceStatus.text = "You're overspending!"
         } else if (balance == 0.0) {
@@ -141,12 +128,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Update budget info
         val monthlyBudget = prefsManager.getMonthlyBudget()
         val remainingBudget = monthlyBudget - totalExpense
         binding.tvRemainingBudget.text = CurrencyFormatter.formatAmount(remainingBudget, currencySymbol)
 
-        // Calculate percentage of budget spent
         val percentSpent = if (monthlyBudget > 0) {
             (totalExpense / monthlyBudget * 100).toInt()
         } else {
@@ -156,7 +141,6 @@ class MainActivity : AppCompatActivity() {
         binding.progressBudget.progress = percentSpent
         binding.tvBudgetPercentage.text = "$percentSpent%"
 
-        // Update budget status text and color based on percentage
         val (statusText, colorId) = when {
             percentSpent >= 100 -> Pair("Budget exceeded!", R.color.expense)
             percentSpent >= 80 -> Pair("Getting close to limit!", R.color.warning)
@@ -167,44 +151,72 @@ class MainActivity : AppCompatActivity() {
         binding.tvBudgetStatus.text = statusText
         binding.tvBudgetStatus.setTextColor(getColor(colorId))
         binding.progressBudget.progressTintList = ColorStateList.valueOf(getColor(colorId))
+
+        // Update Top Expense
+        val expensesByCategory = transactionRepository.getExpensesByCategory()
+        if (expensesByCategory.isNotEmpty()) {
+            val topCategory = expensesByCategory.maxByOrNull { it.value }
+            if (topCategory != null) {
+                binding.tvTopCategory.text = topCategory.key
+                binding.tvTopCategoryAmount.text = CurrencyFormatter.formatAmount(topCategory.value, currencySymbol)
+                
+                // Set category icon
+                when (topCategory.key.lowercase()) {
+                    "food" -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_food)
+                    "transport" -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_transport)
+                    "bills" -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_bills)
+                    "entertainment" -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_entertainment)
+                    "shopping" -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_shopping)
+                    "health" -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_health)
+                    "education" -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_education)
+                    else -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_other)
+                }
+            }
+        }
+
+        // Update Recent Activity
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfDay = calendar.timeInMillis
+        val endOfDay = startOfDay + 24 * 60 * 60 * 1000
+
+        val todayTransactions = transactionRepository.getTransactionsByDateRange(startOfDay, endOfDay)
+        binding.tvRecentActivityCount.text = todayTransactions.size.toString()
     }
 
-
     private fun updateUserName() {
-        // First try user_profile SharedPreferences (which we set during login)
         val sharedPrefs = getSharedPreferences("user_profile", Context.MODE_PRIVATE)
         val userName = sharedPrefs.getString("name", "")
 
         if (!userName.isNullOrEmpty()) {
             tvUserName.text = userName
         } else {
-            // If not found, try directly via UserManager as backup
             val userManager = UserManager(this)
             val userNameFromManager = userManager.getCurrentUserName()
 
             if (!userNameFromManager.isNullOrEmpty()) {
-                // Found name in UserManager, save it to user_profile for next time
                 tvUserName.text = userNameFromManager
                 sharedPrefs.edit().putString("name", userNameFromManager).apply()
             } else {
-                // If still no name found, use email if available
                 val email = userManager.getCurrentUserEmail()
                 if (!email.isNullOrEmpty()) {
                     val emailUsername = email.substringBefore("@")
                     tvUserName.text = emailUsername
                     sharedPrefs.edit().putString("name", emailUsername).apply()
                 } else {
-                    // Last resort fallback
                     tvUserName.text = "User"
                 }
             }
         }
 
-        // Update the current date
         val dateFormat = SimpleDateFormat("EEEE, dd MMM yyyy", Locale.getDefault())
         val currentDate = dateFormat.format(Date())
         binding.tvCurrentDate.text = currentDate
     }
+
     private fun setupRecentTransactions() {
         val recentTransactions = transactionRepository.getRecentTransactions(5)
 
@@ -217,7 +229,6 @@ class MainActivity : AppCompatActivity() {
 
             binding.rvRecentTransactions.layoutManager = LinearLayoutManager(this)
 
-            // Fixed constructor call - now with optional delete parameter
             val adapter = TransactionAdapter(
                 recentTransactions,
                 prefsManager.getCurrencySymbol(),
@@ -228,59 +239,27 @@ class MainActivity : AppCompatActivity() {
                     }
                     startActivity(intent)
                 }
-                // No need to pass onDeleteClick since we made it optional
             )
 
             binding.rvRecentTransactions.adapter = adapter
         }
 
         binding.btnViewAllTransactions.setOnClickListener {
-            // Navigate to transactions screen
             startActivity(Intent(this, TransactionActivity::class.java))
-        }
-    }
-
-    private fun testNotificationDirectly() {
-        try {
-            val notificationHelper = NotificationHelper(this)
-            notificationHelper.showBudgetWarningNotification(85)
-            Toast.makeText(this, "Test notification sent directly", Toast.LENGTH_SHORT).show()
-            Log.d("MainActivity", "Test notification sent for user: ${NotificationHelper.USER_LOGIN}")
-        } catch (e: Exception) {
-            Log.e("MainActivity", "Error sending test notification: ${e.message}", e)
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun checkBudgetAndScheduleReminders() {
         try {
-            // For regular checks in MainActivity, use regular service (not foreground)
-            if (prefsManager.shouldNotifyBudgetWarning()) {
-                val budgetIntent = Intent(this, BudgetCheckService::class.java).apply {
-                    action = BudgetCheckService.ACTION_CHECK_BUDGET
-                    // Don't set EXTRA_START_AS_FOREGROUND here
-                }
-                startService(budgetIntent)  // Regular service, not foreground
-                Log.d("MainActivity", "Budget check service started")
-            }
-
-            // Schedule reminders if enabled
             if (prefsManager.shouldShowDailyReminders()) {
                 val reminderIntent = Intent(this, BudgetCheckService::class.java).apply {
                     action = BudgetCheckService.ACTION_SCHEDULE_DAILY_REMINDER
-                    // Don't set EXTRA_START_AS_FOREGROUND here
                 }
-                startService(reminderIntent)  // Regular service, not foreground
-                Log.d("MainActivity", "Daily reminders scheduled")
+                startService(reminderIntent)
+                Log.d(TAG, "Daily reminders scheduled")
             }
         } catch (e: Exception) {
-            Log.e("MainActivity", "Error starting service: ${e.message}", e)
+            Log.e(TAG, "Error starting service: ${e.message}", e)
         }
     }
-
-
-
-
-
-
 }

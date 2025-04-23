@@ -2,91 +2,98 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- Profile Settings with modern icons -->
     <PreferenceCategory
-        app:iconSpaceReserved="false"
-        app:title="Profile Settings">
+        app:title="Profile Settings"
+        app:icon="@drawable/ic_account_circle"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
 
         <Preference
-            app:iconSpaceReserved="false"
             app:key="profile"
-            app:summary="Edit your name, email and profile picture"
-            app:title="Edit Profile" />
+            app:title="Edit Profile"
+            app:summary="Update your name, email and personal details"
+            app:icon="@drawable/ic_edit_profile" />
     </PreferenceCategory>
 
+    <!-- Budget Settings with visual indicators -->
     <PreferenceCategory
-        app:iconSpaceReserved="false"
-        app:title="Budget &amp; Notifications">
+        app:title="Budget Management"
+        app:icon="@drawable/ic_budget"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
 
         <SwitchPreferenceCompat
-            app:defaultValue="true"
-            app:iconSpaceReserved="false"
             app:key="budget_alerts"
-            app:summary="Get notified when you approach your monthly budget limit"
-            app:title="Budget Alert Notifications" />
+            app:title="Budget Alerts"
+            app:summary="Receive notifications when approaching your budget limit"
+            app:icon="@drawable/ic_notifications"
+            app:defaultValue="true" />
 
         <SwitchPreferenceCompat
-            app:defaultValue="false"
-            app:iconSpaceReserved="false"
             app:key="daily_reminder"
-            app:summary="Get daily reminders to record your expenses"
-            app:title="Daily Expense Reminders" />
+            app:title="Daily Expense Reminders"
+            app:summary="Get friendly daily reminders to track your spending"
+            app:icon="@drawable/ic_reminder"
+            app:defaultValue="false" />
 
-        <EditTextPreference
-            app:defaultValue="80"
-            app:iconSpaceReserved="false"
-            app:key="budget_warning_percent"
-            app:summary="Percentage of budget to trigger warning (between 50-90)"
-            app:title="Budget Warning Threshold (%)"
-            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
+    <!-- Currency Settings with visual design -->
     <PreferenceCategory
-        app:iconSpaceReserved="false"
-        app:title="Currency Settings">
+        app:title="Currency &amp; Display"
+        app:icon="@drawable/ic_currency_exchange"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
 
         <ListPreference
+            app:key="default_currency"
+            app:title="Default Currency"
+            app:summary="Choose your preferred currency for transactions"
+            app:icon="@drawable/ic_money"
             app:defaultValue="USD"
             app:entries="@array/currency_entries"
             app:entryValues="@array/currency_values"
-            app:iconSpaceReserved="false"
-            app:key="default_currency"
-            app:summary="Set your preferred currency for transactions"
-            app:title="Default Currency"
             app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
+    <!-- Data Management with enhanced visuals -->
     <PreferenceCategory
-        app:iconSpaceReserved="false"
-        app:title="Data Management">
+        app:title="Data Management"
+        app:icon="@drawable/ic_data"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true">
 
         <Preference
-            app:iconSpaceReserved="false"
             app:key="backup_data"
-            app:summary="Save your transactions and settings to a file"
-            app:title="Backup Data" />
+            app:title="Backup Data"
+            app:summary="Create a secure backup of your transactions and settings"
+            app:icon="@drawable/ic_backup" />
 
         <Preference
-            app:iconSpaceReserved="false"
             app:key="restore_data"
-            app:summary="Restore your transactions from a backup"
-            app:title="Restore Data" />
+            app:title="Restore Data"
+            app:summary="Restore your transactions and settings from a backup file"
+            app:icon="@drawable/ic_restore" />
 
-        <Preference
-            app:iconSpaceReserved="false"
-            app:key="export_transactions"
-            app:summary="Export your transactions as CSV file"
-            app:title="Export Transactions" />
+
+
     </PreferenceCategory>
 
+    <!-- Account Management section -->
     <PreferenceCategory
-        app:iconSpaceReserved="false"
-        app:title="Account">
+        app:title="Account"
+        app:icon="@drawable/ic_security"
+        app:allowDividerAbove="true">
 
         <Preference
-            app:iconSpaceReserved="false"
             app:key="logout"
-            app:summary="Sign out from your account"
-            app:title="Logout" />
+            app:title="Logout"
+            app:summary="Sign out from your account and exit"
+            app:icon="@drawable/ic_exit_to_app" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

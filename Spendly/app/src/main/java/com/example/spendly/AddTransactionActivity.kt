@@ -2,6 +2,7 @@ package com.example.spendly
 
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -22,6 +23,7 @@ class AddTransactionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddTransactionBinding
     private lateinit var repository: TransactionRepository
     private lateinit var categoryAdapter: CategoryAdapter
+    private lateinit var prefs: SharedPreferences
 
     private var selectedDate = System.currentTimeMillis()
     private var currentType = TransactionType.EXPENSE
@@ -34,6 +36,7 @@ class AddTransactionActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         repository = TransactionRepository(this)
+        prefs = getSharedPreferences("user_prefs", MODE_PRIVATE)
 
         setupToolbar()
         setupTypeSwitch()
@@ -41,8 +44,8 @@ class AddTransactionActivity : AppCompatActivity() {
         setupCategorySelection()
         setupValidation()
         setupSaveButton()
+        setupCurrencySymbol()
 
-        // Check if we're editing an existing transaction
         val transactionId = intent.getStringExtra("TRANSACTION_ID")
         if (transactionId != null) {
             loadTransaction(transactionId)
@@ -80,7 +83,6 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun setupDatePicker() {
         updateDateDisplay()
 
-        // Set up date picker dialog
         binding.tilDate.setEndIconOnClickListener {
             showDatePickerDialog()
         }
@@ -119,7 +121,7 @@ class AddTransactionActivity : AppCompatActivity() {
 
     private fun setupCategorySelection() {
         binding.rvCategories.layoutManager = GridLayoutManager(this, 4)
-        loadCategories(TransactionType.EXPENSE) // Default to expense categories
+        loadCategories(TransactionType.EXPENSE)
     }
 
     private fun loadCategories(type: TransactionType) {
@@ -129,22 +131,18 @@ class AddTransactionActivity : AppCompatActivity() {
             getIncomeCategories()
         }
 
-        // Reset selected category when changing type
         selectedCategory = null
         binding.tvSelectedCategory.visibility = View.GONE
 
         categoryAdapter = CategoryAdapter(this, categories) { category ->
-            // Update selected category
             categories.forEach { it.isSelected = false }
             category.isSelected = true
             selectedCategory = category
             categoryAdapter.notifyDataSetChanged()
 
-            // Show selected category pill
             binding.tvSelectedCategory.text = category.title
             binding.tvSelectedCategory.visibility = View.VISIBLE
 
-            // Update save button state
             updateSaveButtonState()
         }
 
@@ -265,17 +263,14 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun validateInputs(): Boolean {
         var isValid = true
 
-        // Validate title
         if (!validateTitle()) {
             isValid = false
         }
 
-        // Validate amount
         if (!validateAmount()) {
             isValid = false
         }
 
-        // Validate category
         if (!validateCategory()) {
             isValid = false
         }
@@ -288,9 +283,9 @@ class AddTransactionActivity : AppCompatActivity() {
             val title = binding.etTitle.text.toString().trim()
             val amount = binding.etAmount.text.toString().toDouble()
             val category = selectedCategory?.name ?: ""
+            val currencyCode = prefs.getString("currency_code", "USD") ?: "USD"
 
-            // Set isIncome based on the current type
-            val isIncome = currentType == TransactionType.INCOME
+            val isIncome = currentType == TransactionType.EXPENSE
 
             val transaction = editingTransaction?.copy(
                 title = title,
@@ -298,21 +293,27 @@ class AddTransactionActivity : AppCompatActivity() {
                 category = category,
                 date = selectedDate,
                 type = currentType,
-                isIncome = isIncome
+                isIncome = isIncome,
+                currencyCode = currencyCode
             ) ?: Transaction(
                 title = title,
                 amount = amount,
                 category = category,
                 date = selectedDate,
                 type = currentType,
-                isIncome = isIncome
+                isIncome = isIncome,
+                currencyCode = currencyCode
             )
 
             repository.saveTransaction(transaction)
 
-            val budgetIntent = Intent(this, BudgetCheckService::class.java)
-            budgetIntent.action = BudgetCheckService.ACTION_CHECK_BUDGET
-            startService(budgetIntent)
+            // Trigger budget check only for expense transactions
+            if (currentType == TransactionType.EXPENSE) {
+                val budgetIntent = Intent(this, BudgetCheckService::class.java).apply {
+                    action = BudgetCheckService.ACTION_CHECK_BUDGET
+                }
+                startService(budgetIntent)
+            }
 
             showSuccessMessage()
             finish()
@@ -338,30 +339,25 @@ class AddTransactionActivity : AppCompatActivity() {
         if (transaction != null) {
             editingTransaction = transaction
 
-            // Set title
             supportActionBar?.setTitle("Edit Transaction")
 
-            // Fill form fields
             binding.etTitle.setText(transaction.title)
             binding.etAmount.setText(transaction.amount.toString())
             selectedDate = transaction.date
             updateDateDisplay()
 
-            // Set transaction type
             if (transaction.type == TransactionType.INCOME) {
                 binding.tabLayoutType.getTabAt(1)?.select()
             } else {
                 binding.tabLayoutType.getTabAt(0)?.select()
             }
 
-            // Select category
             val categories = if (transaction.type == TransactionType.EXPENSE) {
                 getExpenseCategories()
             } else {
                 getIncomeCategories()
             }
 
-            // Select the right category
             categories.forEach { category ->
                 if (category.name.equals(transaction.category, ignoreCase = true)) {
                     category.isSelected = true
@@ -371,7 +367,6 @@ class AddTransactionActivity : AppCompatActivity() {
                 }
             }
 
-            // Update save button text
             binding.btnSave.text = "Update Transaction"
         }
     }
@@ -402,5 +397,11 @@ class AddTransactionActivity : AppCompatActivity() {
     override fun onBackPressed() {
         super.onBackPressed()
         overridePendingTransition(R.anim.fade_in, R.anim.slide_out_bottom)
+    }
+
+    private fun setupCurrencySymbol() {
+        val currencyCode = prefs.getString("currency_code", "USD") ?: "USD"
+        val currencySymbol = Currency.getInstance(currencyCode).symbol
+        binding.tvCurrencySymbol.text = currencySymbol
     }
 }

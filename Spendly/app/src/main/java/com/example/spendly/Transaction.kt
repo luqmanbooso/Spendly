@@ -13,7 +13,14 @@ data class Transaction(
     val isIncome : Boolean,
     val date: Long = System.currentTimeMillis(),
     val type: TransactionType = TransactionType.EXPENSE,
-) : Parcelable
+    val currencyCode: String = getDefaultCurrencyCode()
+) : Parcelable {
+    companion object {
+        private fun getDefaultCurrencyCode(): String {
+            return "USD" // Default fallback
+        }
+    }
+}
 
 enum class TransactionType {
     INCOME, EXPENSE

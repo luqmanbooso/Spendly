@@ -54,7 +54,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_semibold"
-                        android:text="Transaction Type"
+                        android:text="@string/transaction_type"
                         android:textColor="@color/text_primary"
                         android:textSize="20sp" />
 
@@ -109,7 +109,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_semibold"
-                        android:text="Amount"
+                        android:text="@string/amount"
                         android:textColor="@color/text_primary"
                         android:textSize="18sp" />
 
@@ -127,7 +127,6 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins_bold"
-                            android:text="$"
                             android:textColor="@color/text_primary"
                             android:textSize="36sp" />
 
@@ -140,7 +139,7 @@
                             android:background="@null"
                             android:fontFamily="@font/poppins_bold"
                             android:gravity="start"
-                            android:hint="0.00"
+                            android:hint="@string/amount_hint"
                             android:inputType="numberDecimal"
                             android:textColor="@color/text_primary"
                             android:textColorHint="@color/text_secondary"
@@ -153,7 +152,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:fontFamily="@font/poppins"
-                        android:text="Please enter a valid amount"
+                        android:text="@string/amount_error"
                         android:textColor="@color/expense"
                         android:textSize="14sp"
                         android:visibility="gone" />
@@ -180,7 +179,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_semibold"
-                        android:text="Transaction Details"
+                        android:text="@string/transaction_details"
                         android:textColor="@color/text_primary"
                         android:textSize="18sp" />
 
@@ -191,7 +190,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:hint="Title"
+                        android:hint="@string/title"
                         app:boxCornerRadiusBottomEnd="16dp"
                         app:boxCornerRadiusBottomStart="16dp"
                         app:boxCornerRadiusTopEnd="16dp"
@@ -221,7 +220,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:hint="Date"
+                        android:hint="@string/date"
                         app:boxCornerRadiusBottomEnd="16dp"
                         app:boxCornerRadiusBottomStart="16dp"
                         app:boxCornerRadiusTopEnd="16dp"
@@ -279,7 +278,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:fontFamily="@font/poppins_semibold"
-                            android:text="Category"
+                            android:text="@string/category"
                             android:textColor="@color/text_primary"
                             android:textSize="18sp" />
 
@@ -288,7 +287,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins"
-                            android:text="Required"
+                            android:text="@string/category_required"
                             android:textColor="@color/expense"
                             android:textSize="14sp"
                             android:visibility="gone" />
@@ -301,7 +300,7 @@
                             android:fontFamily="@font/poppins_medium"
                             android:paddingHorizontal="14dp"
                             android:paddingVertical="8dp"
-                            android:text="Select a category"
+                            android:text="@string/select_category_hint"
                             android:textColor="@color/white"
                             android:textSize="14sp"
                             android:visibility="gone" />
@@ -344,7 +343,7 @@
             android:backgroundTint="@color/category_bills"
             android:enabled="false"
             android:fontFamily="@font/poppins_semibold"
-            android:text="Save Transaction"
+            android:text="@string/save_transaction"
             android:textAllCaps="false"
             android:textSize="16sp"
             app:cornerRadius="32dp"

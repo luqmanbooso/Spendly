@@ -7,14 +7,15 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
+        android:paddingTop="24dp"
         android:background="@color/white"
         android:elevation="0dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="76dp"
             app:navigationIcon="@drawable/ic_back"
             app:title="Settings"
             app:titleCentered="true"
@@ -27,5 +28,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        android:paddingTop="16dp" />
+        android:paddingTop="16dp"
+        android:translationY="10dp" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

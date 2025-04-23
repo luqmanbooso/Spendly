@@ -36,7 +36,7 @@ class OnboardingAdapter(
         holder.itemDesc.text = ""
 
         // Then set the new content
-        holder.itemImage.setImageResource(images[position])
+        ImageScaler.setResourceSafely(holder.itemView.context, holder.itemImage, images[position])
         holder.itemTitle.text = titles[position]
         holder.itemDesc.text = descriptions[position]
 

@@ -11,17 +11,13 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import java.util.*
 
-/**
- * Background service that checks budget status and sends notifications if needed.
- * Handles both regular budget checks and scheduled reminders.
- */
+
 class BudgetCheckService : Service() {
 
     private lateinit var prefsManager: PrefsManager
     private lateinit var transactionRepository: TransactionRepository
     private lateinit var notificationHelper: NotificationHelper
 
-    // Cache for calendar instances to avoid repeated creation
     private val calendarCache = ThreadLocal<Calendar>()
 
     override fun onCreate() {
@@ -30,7 +26,6 @@ class BudgetCheckService : Service() {
         transactionRepository = TransactionRepository(this)
         notificationHelper = NotificationHelper(this)
 
-        // Create notification channel for foreground service
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createServiceNotificationChannel()
         }
@@ -49,16 +44,14 @@ class BudgetCheckService : Service() {
                 startForeground(FOREGROUND_SERVICE_ID, notification)
             }
 
-            // Process the action
             when (action) {
-                ACTION_CHECK_BUDGET -> checkBudgetStatus()
+                ACTION_CHECK_BUDGET -> checkBudget()
                 ACTION_DAILY_REMINDER -> sendDailyReminder()
                 ACTION_SCHEDULE_DAILY_REMINDER -> scheduleDailyReminder()
                 ACTION_CANCEL_DAILY_REMINDER -> cancelDailyReminder()
                 else -> Log.d(TAG, "Unknown action: $action")
             }
 
-            // Stop foreground if needed
             if (startedAsForeground) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     stopForeground(STOP_FOREGROUND_REMOVE)
@@ -72,7 +65,6 @@ class BudgetCheckService : Service() {
             Log.e(TAG, "Error in service: ${e.message}", e)
         }
 
-        // Always stop the service when done
         stopSelf(startId)
         return START_NOT_STICKY
     }
@@ -105,39 +97,55 @@ class BudgetCheckService : Service() {
             .build()
     }
 
-    private fun checkBudgetStatus() {
+    private fun checkBudget() {
         if (!prefsManager.shouldNotifyBudgetWarning()) {
-            Log.d(TAG, "Budget notifications are disabled")
+            Log.d(TAG, "Budget notifications are disabled for user: ${notificationHelper.getCurrentUser()}")
             return
         }
 
         val monthlyBudget = prefsManager.getMonthlyBudget()
         if (monthlyBudget <= 0) {
-            Log.d(TAG, "No monthly budget set")
+            Log.d(TAG, "No monthly budget set for user: ${notificationHelper.getCurrentUser()}")
             return
         }
 
-        // Get calendar instance from cache or create new one
-        val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
-        calendar.timeInMillis = System.currentTimeMillis()
-        val currentMonth = calendar.get(Calendar.MONTH)
-        val currentYear = calendar.get(Calendar.YEAR)
-
         val totalExpense = transactionRepository.getTotalExpenseForCurrentMonth()
-        val percentSpent = ((totalExpense / monthlyBudget) * 100).toInt().coerceIn(0, 100)
-        val currencySymbol = prefsManager.getCurrencySymbol()
+        val percentSpent = ((totalExpense / monthlyBudget) * 100).toInt()
+        val warningThreshold = prefsManager.getBudgetWarningThreshold()
 
-        Log.d(TAG, "Budget check: $percentSpent% spent, budget: $monthlyBudget, expenses: $totalExpense")
+        if (percentSpent >= 100) {
+            val exceededAmount = totalExpense - monthlyBudget
+            notificationHelper.showBudgetExceededNotification(
+                exceededAmount,
+                prefsManager.getCurrencySymbol()
+            )
+            Log.d(TAG, "Budget exceeded by ${CurrencyFormatter.formatAmount(exceededAmount, prefsManager.getCurrencySymbol())} for user: ${notificationHelper.getCurrentUser()}")
+        } else if (percentSpent >= warningThreshold) {
+            notificationHelper.showBudgetWarningNotification(percentSpent)
+            Log.d(TAG, "Budget warning at $percentSpent% for user: ${notificationHelper.getCurrentUser()}")
+        }
 
-        when {
-            totalExpense > monthlyBudget -> {
-                val exceededAmount = totalExpense - monthlyBudget
-                notificationHelper.showBudgetExceededNotification(exceededAmount, currencySymbol)
-                Log.d(TAG, "Budget exceeded notification sent for user: ${NotificationHelper.USER_LOGIN}")
-            }
-            percentSpent >= 80 && percentSpent < 100 -> {
-                notificationHelper.showBudgetWarningNotification(percentSpent)
-                Log.d(TAG, "Budget warning notification sent for user: ${NotificationHelper.USER_LOGIN}")
+        val categories = listOf("food", "transport", "bills", "entertainment",
+            "shopping", "health", "education", "other")
+        
+        for (category in categories) {
+            val categoryBudget = prefsManager.getCategoryBudget(category)
+            if (categoryBudget > 0) {
+                val categoryExpense = transactionRepository.getExpenseForCategory(category)
+                val categoryPercentSpent = ((categoryExpense / categoryBudget) * 100).toInt()
+
+                if (categoryPercentSpent >= 100) {
+                    val exceededAmount = categoryExpense - categoryBudget
+                    notificationHelper.showCategoryBudgetExceededNotification(
+                        category,
+                        exceededAmount,
+                        prefsManager.getCurrencySymbol()
+                    )
+                    Log.d(TAG, "$category budget exceeded by ${CurrencyFormatter.formatAmount(exceededAmount, prefsManager.getCurrencySymbol())} for user: ${notificationHelper.getCurrentUser()}")
+                } else if (categoryPercentSpent >= warningThreshold) {
+                    notificationHelper.showCategoryBudgetWarningNotification(category, categoryPercentSpent)
+                    Log.d(TAG, "$category budget warning at $categoryPercentSpent% for user: ${notificationHelper.getCurrentUser()}")
+                }
             }
         }
     }
@@ -145,7 +153,7 @@ class BudgetCheckService : Service() {
     private fun sendDailyReminder() {
         if (prefsManager.shouldShowDailyReminders()) {
             notificationHelper.showDailyReminderNotification()
-            Log.d(TAG, "Daily reminder notification sent for user: ${NotificationHelper.USER_LOGIN}")
+            Log.d(TAG, "Daily reminder notification sent for user: ${notificationHelper.getCurrentUser()}")
         }
     }
 
@@ -169,11 +177,10 @@ class BudgetCheckService : Service() {
     @SuppressLint("ScheduleExactAlarm")
     private fun scheduleDailyReminder() {
         if (!prefsManager.shouldShowDailyReminders()) {
-            Log.d(TAG, "Daily reminders are disabled")
+            Log.d(TAG, "Daily reminders are disabled for user: ${notificationHelper.getCurrentUser()}")
             return
         }
 
-        // Get the user's preferred reminder time
         val timeString = prefsManager.getReminderTime()
         Log.d(TAG, "Scheduling daily reminder with time: $timeString")
 
@@ -189,10 +196,8 @@ class BudgetCheckService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // First, cancel any existing alarms
         alarmManager.cancel(pendingIntent)
 
-        // Parse reminder time
         val parts = timeString.split(":")
         if (parts.size != 2) {
             Log.e(TAG, "Invalid reminder time format: $timeString")
@@ -203,14 +208,12 @@ class BudgetCheckService : Service() {
             val hour = parts[0].toInt()
             val minute = parts[1].toInt()
 
-            // Get calendar instance from cache or create new one
             val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
             calendar.apply {
                 set(Calendar.HOUR_OF_DAY, hour)
                 set(Calendar.MINUTE, minute)
                 set(Calendar.SECOND, 0)
 
-                // If time is in the past, set it for tomorrow
                 if (timeInMillis < System.currentTimeMillis()) {
                     add(Calendar.DAY_OF_YEAR, 1)
                 }
@@ -218,7 +221,6 @@ class BudgetCheckService : Service() {
 
             try {
                 Log.d(TAG, "Attempting to schedule exact alarm for ${calendar.time}")
-                // Try setExact first as it's more reliable
                 alarmManager.setExact(
                     AlarmManager.RTC_WAKEUP,
                     calendar.timeInMillis,
@@ -227,7 +229,6 @@ class BudgetCheckService : Service() {
                 Log.d(TAG, "Daily reminder scheduled for ${calendar.time}")
             } catch (e: Exception) {
                 Log.e(TAG, "Error scheduling exact alarm: ${e.message}")
-                // Fallback to regular set method
                 alarmManager.set(
                     AlarmManager.RTC_WAKEUP,
                     calendar.timeInMillis,
@@ -238,7 +239,6 @@ class BudgetCheckService : Service() {
         } catch (e: Exception) {
             Log.e(TAG, "Error scheduling reminder: ${e.message}")
 
-            // Emergency fallback - schedule for 8pm today or tomorrow
             fallbackSchedule(alarmManager, pendingIntent)
         }
     }
@@ -265,9 +265,9 @@ class BudgetCheckService : Service() {
     }
     companion object {
         private const val TAG = "BudgetCheckService"
-        const val ACTION_CHECK_BUDGET = "com.example.spendly.CHECK_BUDGET"
+        const val ACTION_CHECK_BUDGET = "com.example.spendly.ACTION_CHECK_BUDGET"
         const val ACTION_DAILY_REMINDER = "com.example.spendly.DAILY_REMINDER"
-        const val ACTION_SCHEDULE_DAILY_REMINDER = "com.example.spendly.SCHEDULE_REMINDER"
+        const val ACTION_SCHEDULE_DAILY_REMINDER = "com.example.spendly.ACTION_SCHEDULE_DAILY_REMINDER"
         const val EXTRA_START_AS_FOREGROUND = "start_as_foreground"
         private const val REMINDER_REQUEST_CODE = 1001
         const val ACTION_CANCEL_DAILY_REMINDER = "com.example.spendly.CANCEL_DAILY_REMINDER"

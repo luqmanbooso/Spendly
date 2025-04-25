@@ -24,34 +24,29 @@ class BottomNavHelper(private val context: Context, private val rootView: View) 
 
     fun setupBottomNav(currentSection: NavSection) {
         try {
-            // Find all navigation items
             val navHome = rootView.findViewById<View>(R.id.nav_home)
             val navTransactions = rootView.findViewById<View>(R.id.nav_transactions)
             val navBudget = rootView.findViewById<View>(R.id.nav_budget)
             val navAnalysis = rootView.findViewById<View>(R.id.nav_analysis)
             val fabAddTransaction = rootView.findViewById<FrameLayout>(R.id.nav_add_transaction)
 
-            // Log if any views are null to help debugging
             if (navHome == null) Log.e(TAG, "navHome is null")
             if (navTransactions == null) Log.e(TAG, "navTransactions is null")
             if (navBudget == null) Log.e(TAG, "navBudget is null")
             if (navAnalysis == null) Log.e(TAG, "navAnalysis is null")
             if (fabAddTransaction == null) Log.e(TAG, "fabAddTransaction is null")
 
-            // Safety check - at least make sure we don't crash
             if (navHome == null || navTransactions == null || navBudget == null ||
                 navAnalysis == null || fabAddTransaction == null) {
                 Log.e(TAG, "Some navigation views are missing. Layout may not be properly included.")
                 return
             }
 
-            // Reset all tabs to inactive state
             navHome.let { setNavItemState(it, false, "Home") }
             navTransactions.let { setNavItemState(it, false, "Transactions") }
             navBudget.let { setNavItemState(it, false, "Budget") }
             navAnalysis.let { setNavItemState(it, false, "Analysis") }
 
-            // Set the active tab based on current section
             when (currentSection) {
                 NavSection.HOME -> navHome.let { setNavItemState(it, true, "Home") }
                 NavSection.TRANSACTIONS -> navTransactions.let { setNavItemState(it, true, "Transactions") }
@@ -59,7 +54,6 @@ class BottomNavHelper(private val context: Context, private val rootView: View) 
                 NavSection.ANALYSIS, NavSection.REPORTS -> navAnalysis.let { setNavItemState(it, true, "Analysis") }
             }
 
-            // Set up click listeners
             if (currentSection != NavSection.HOME) {
                 navHome.setOnClickListener {
                     navigateTo(MainActivity::class.java)
@@ -84,13 +78,11 @@ class BottomNavHelper(private val context: Context, private val rootView: View) 
                 }
             }
 
-            // Set up FAB
             fabAddTransaction.setOnClickListener {
                 context.startActivity(Intent(context, AddTransactionActivity::class.java))
                 (context as? Activity)?.overridePendingTransition(R.anim.slide_up, R.anim.fade_out)
             }
         } catch (e: Exception) {
-            // Log any exceptions to help debugging
             Log.e(TAG, "Error setting up bottom nav: ${e.message}")
             e.printStackTrace()
         }
@@ -113,7 +105,6 @@ class BottomNavHelper(private val context: Context, private val rootView: View) 
             val startColor = if (isActive) context.getColor(R.color.text_secondary) else context.getColor(R.color.primary)
             val endColor = if (isActive) context.getColor(R.color.primary) else context.getColor(R.color.text_secondary)
 
-            // Animate color change
             val colorAnimator = ValueAnimator.ofArgb(startColor, endColor)
             colorAnimator.duration = 200
             colorAnimator.addUpdateListener { animation ->
@@ -123,7 +114,6 @@ class BottomNavHelper(private val context: Context, private val rootView: View) 
             }
             colorAnimator.start()
 
-            // Apply bounce animation if active
             if (isActive) {
                 val bounceAnim = AnimationUtils.loadAnimation(context, R.anim.nav_bounce)
                 icon.startAnimation(bounceAnim)
@@ -160,7 +150,6 @@ class BottomNavHelper(private val context: Context, private val rootView: View) 
             intent.flags = Intent.FLAG_ACTIVITY_NO_ANIMATION
             context.startActivity(intent)
             
-            // Apply exit animation
             (context as? Activity)?.overridePendingTransition(
                 R.anim.fab_scale_down,
                 R.anim.fab_scale_up

@@ -35,7 +35,6 @@ class CategoryBudgetAdapter(
         val percentSpent = item.getPercentSpent()
         holder.progressBar.progress = percentSpent
 
-        // Set progress color based on percentage spent
         val colorRes = when {
             percentSpent >= 90 -> R.color.expense
             percentSpent >= 70 -> R.color.warning
@@ -43,10 +42,8 @@ class CategoryBudgetAdapter(
         }
         holder.progressBar.progressTintList = ColorStateList.valueOf(ContextCompat.getColor(context, colorRes))
 
-        // Set category icon and color
         setIconAndColor(holder, item.category)
 
-        // Set click listener
         holder.itemView.setOnClickListener { onClick(item) }
     }
 
@@ -78,7 +75,6 @@ class CategoryBudgetAdapter(
     }
 }
 
-// Extension function to capitalize the first letter of a string
 fun String.capitalize(): String {
     return if (isNotEmpty()) {
         this[0].uppercase() + substring(1)

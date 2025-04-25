@@ -19,7 +19,6 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var prefsManager: PrefsManager
     private lateinit var indicators: Array<ImageView?>
 
-    // Data for onboarding screens
     private val onboardingImages = intArrayOf(
         R.drawable.onboarding_expense_tracker,
         R.drawable.onboarding_budget_management,
@@ -45,10 +44,8 @@ class OnboardingActivity : AppCompatActivity() {
 
         prefsManager = PrefsManager(this)
 
-        // Hide action bar
         supportActionBar?.hide()
 
-        // Set up the adapter for ViewPager with stable IDs to prevent recycling issues
         val adapter = OnboardingAdapter(
             onboardingImages,
             onboardingTitles,
@@ -56,72 +53,61 @@ class OnboardingActivity : AppCompatActivity() {
         )
         binding.viewPager.adapter = adapter
 
-        // Prevent content bleeding between pages
         binding.viewPager.offscreenPageLimit = 1
 
-        // Setup custom indicators
         setupIndicators()
         updateIndicator(0)
 
-        // Simple fix for visibility issues
         binding.viewPager.setPageTransformer { page, position ->
-            // Find the views
             val title = page.findViewById<TextView>(R.id.onboardingTitle)
             val desc = page.findViewById<TextView>(R.id.onboardingDesc)
+            val image = page.findViewById<ImageView>(R.id.onboardingImage)
 
             when {
-                // Current page (fully visible)
                 position >= -0.1f && position <= 0.1f -> {
                     page.alpha = 1f
-                    title?.alpha = 1f
-                    desc?.alpha = 1f
+                    title?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_up_fade_in))
+                    desc?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_up_fade_in))
+                    image?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_slow))
                 }
 
-                // Adjacent pages (partially visible)
                 position > 0.1f && position < 1f -> {
-                    // Page to the right (next page)
                     page.alpha = 1 - position
-                    title?.alpha = 0f
-                    desc?.alpha = 0f
+                    title?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_down_fade_out))
+                    desc?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_down_fade_out))
+                    image?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out))
                 }
 
                 position < -0.1f && position > -1f -> {
-                    // Page to the left (previous page)
                     page.alpha = 1 + position
-                    title?.alpha = 0f
-                    desc?.alpha = 0f
+                    title?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_down_fade_out))
+                    desc?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_down_fade_out))
+                    image?.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out))
                 }
 
-                // Pages not visible
                 else -> {
                     page.alpha = 0f
                 }
             }
         }
 
-        // Set up the Next button
         binding.btnNext.setOnClickListener {
             if (binding.viewPager.currentItem < onboardingImages.size - 1) {
-                // If not on last page, go to next page
                 binding.viewPager.currentItem++
             } else {
-                // If on last page, finish onboarding
                 finishOnboarding()
             }
         }
 
-        // Set up the Skip button
         binding.btnSkip.setOnClickListener {
             finishOnboarding()
         }
 
-        // Update button text when page changes
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 updateIndicator(position)
 
-                // Change button text on last page
                 if (position == onboardingImages.size - 1) {
                     binding.btnNext.text = "Get Started"
                     binding.btnSkip.visibility = View.INVISIBLE
@@ -129,10 +115,6 @@ class OnboardingActivity : AppCompatActivity() {
                     binding.btnNext.text = "Continue"
                     binding.btnSkip.visibility = View.VISIBLE
                 }
-
-                // Apply button animation
-                binding.btnNext.startAnimation(AnimationUtils.loadAnimation(
-                    this@OnboardingActivity, R.anim.button_pulse))
             }
         })
     }
@@ -170,7 +152,6 @@ class OnboardingActivity : AppCompatActivity() {
                     )
                 )
 
-                // Scale up with animation
                 indicators[i]?.animate()
                     ?.scaleX(1.2f)
                     ?.scaleY(1.2f)
@@ -184,7 +165,6 @@ class OnboardingActivity : AppCompatActivity() {
                     )
                 )
 
-                // Reset scale with animation
                 indicators[i]?.animate()
                     ?.scaleX(1.0f)
                     ?.scaleY(1.0f)
@@ -195,11 +175,9 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun finishOnboarding() {
-        // Mark first launch as completed
         prefsManager.setFirstLaunchComplete()
 
-        // Navigate to login activity with animation
-        val intent = Intent(this, LoginActivity::class.java)
+        val intent = Intent(this, MainPage::class.java)
         startActivity(intent)
         finish()
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)

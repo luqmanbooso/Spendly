@@ -29,26 +29,20 @@ class SignUpActivity : AppCompatActivity() {
 
         userManager = UserManager(this)
 
-        // Hide action bar
         supportActionBar?.hide()
 
-        // Set up click listeners
         setupClickListeners()
 
-        // Set up form validation
         setupFormValidation()
 
-        // Format "Log In" text with underline
         val loginText = SpannableString(binding.tvLogin.text)
         loginText.setSpan(UnderlineSpan(), 0, loginText.length, 0)
         binding.tvLogin.text = loginText
 
-        // Apply animations
         applyEntryAnimations()
     }
 
     private fun setupClickListeners() {
-        // Sign up button click
         binding.btnSignUp.setOnClickListener {
             if (validateForm()) {
                 attemptRegistration()
@@ -57,13 +51,11 @@ class SignUpActivity : AppCompatActivity() {
             }
         }
 
-        // Login text click
         binding.tvLogin.setOnClickListener {
             finish()
             overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
         }
 
-        // Back button
         binding.btnBack.setOnClickListener {
             finish()
             overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
@@ -71,7 +63,6 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun setupFormValidation() {
-        // Name validation
         binding.etName.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -81,7 +72,6 @@ class SignUpActivity : AppCompatActivity() {
             }
         })
 
-        // Email validation
         binding.etEmail.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -91,13 +81,11 @@ class SignUpActivity : AppCompatActivity() {
             }
         })
 
-        // Password validation
         binding.etPassword.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 validatePassword()
-                // Validate confirm password as well since the base password changed
                 if (binding.etConfirmPassword.text.toString().isNotEmpty()) {
                     validateConfirmPassword()
                 }
@@ -105,7 +93,6 @@ class SignUpActivity : AppCompatActivity() {
             }
         })
 
-        // Confirm password validation
         binding.etConfirmPassword.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -148,7 +135,6 @@ class SignUpActivity : AppCompatActivity() {
     private fun validatePassword(): Boolean {
         val password = binding.etPassword.text.toString()
 
-        // Password criteria: at least 8 characters, 1 uppercase, 1 digit
         val hasMinLength = password.length >= 8
         val hasUppercase = password.any { it.isUpperCase() }
         val hasDigit = password.any { it.isDigit() }
@@ -185,7 +171,6 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun validateForm(): Boolean {
-        // Validate all fields
         val isNameValid = validateName()
         val isEmailValid = validateEmail()
         val isPasswordValid = validatePassword()
@@ -209,14 +194,11 @@ class SignUpActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.VISIBLE
         binding.btnSignUp.isEnabled = false
 
-        // Simulate network operation
         binding.root.postDelayed({
             binding.progressBar.visibility = View.INVISIBLE
             binding.btnSignUp.isEnabled = true
 
             if (userManager.registerUser(name, email, password)) {
-                // Registration successful
-                // Navigate back to login screen with success message
                 val intent = Intent(this, LoginActivity::class.java)
                 intent.putExtra("REGISTRATION_SUCCESS", true)
                 intent.putExtra("EMAIL", email)
@@ -225,7 +207,6 @@ class SignUpActivity : AppCompatActivity() {
                 finish()
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
             } else {
-                // Registration failed
                 showErrorMessage("Registration failed. Please try again.")
                 showErrorAnimation()
             }
@@ -248,15 +229,18 @@ class SignUpActivity : AppCompatActivity() {
 
     private fun showErrorAnimation() {
         val shake = AnimationUtils.loadAnimation(this, R.anim.shake)
-        binding.signupForm.startAnimation(shake)
+        binding.signupCard.startAnimation(shake)
     }
 
     private fun applyEntryAnimations() {
-        val slideRight = AnimationUtils.loadAnimation(this, R.anim.slide_in_right)
+        val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
+        val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
+        val slideUpDelayed = AnimationUtils.loadAnimation(this, R.anim.slide_up_delayed)
 
-        binding.signupForm.startAnimation(slideRight)
+        binding.tvCreateAccount.startAnimation(fadeIn)
+        binding.tvSignUpPrompt.startAnimation(slideUp)
+        binding.signupCard.startAnimation(slideUpDelayed)
 
-        // Staggered animation for form elements
         binding.tvCreateAccount.alpha = 0f
         binding.tilName.alpha = 0f
         binding.tilEmail.alpha = 0f

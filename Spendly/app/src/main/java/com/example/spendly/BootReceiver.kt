@@ -18,34 +18,32 @@ class BootReceiver : BroadcastReceiver() {
 
             try {
                 val prefsManager = PrefsManager(context)
+                val notificationHelper = NotificationHelper(context)
 
                 if (prefsManager.shouldShowDailyReminders()) {
+                    Log.d(TAG, "Daily reminders are enabled, scheduling after boot")
+
                     val reminderIntent = Intent(context, BudgetCheckService::class.java).apply {
                         action = BudgetCheckService.ACTION_SCHEDULE_DAILY_REMINDER
                     }
-                    startServiceSafely(context, reminderIntent)
+                    context.startService(reminderIntent)
                     Log.d(TAG, "Daily reminder scheduled after boot")
                 }
 
-                Log.d(TAG, "Boot initialization complete for user: ${NotificationHelper.USER_LOGIN}")
+                if (prefsManager.shouldNotifyBudgetWarning()) {
+                    Log.d(TAG, "Budget alerts are enabled")
+                    val budgetIntent = Intent(context, BudgetCheckService::class.java).apply {
+                        action = BudgetCheckService.ACTION_CHECK_BUDGET
+                    }
+                    context.startService(budgetIntent)
+                    Log.d(TAG, "Budget check scheduled after boot")
+                }
+
+                Log.d(TAG, "Boot initialization complete for user: ${notificationHelper.getCurrentUser()}")
             } catch (e: Exception) {
                 Log.e(TAG, "Error restoring notifications after boot: ${e.message}")
                 e.printStackTrace()
             }
-        }
-    }
-
-    private fun startServiceSafely(context: Context, intent: Intent) {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Log.d(TAG, "Starting foreground service for action: ${intent.action}")
-                context.startForegroundService(intent)
-            } else {
-                Log.d(TAG, "Starting normal service for action: ${intent.action}")
-                context.startService(intent)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error starting service: ${e.message}", e)
         }
     }
 }

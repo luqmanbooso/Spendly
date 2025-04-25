@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="bottom">
+    android:layout_gravity="bottom"
+    android:background="#00607D8B"
+    android:backgroundTint="#00607D8B">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/bottomNavCard"
         android:layout_width="417dp"
-        android:layout_height="70dp"
+        android:layout_height="80dp"
         app:cardBackgroundColor="@color/white"
         app:cardElevation="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -26,7 +28,7 @@
         <!-- Main navigation container -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="64dp">
+            android:layout_height="80dp">
 
             <!-- Left side navigation items container -->
             <LinearLayout
@@ -183,7 +185,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/guideline_center_right"
                 app:layout_constraintStart_toEndOf="@+id/guideline_center_left"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0">
+                app:layout_constraintVertical_bias="-0.2">
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"

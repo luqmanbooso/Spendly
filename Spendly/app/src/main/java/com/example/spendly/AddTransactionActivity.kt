@@ -281,11 +281,19 @@ class AddTransactionActivity : AppCompatActivity() {
     private fun saveTransaction() {
         try {
             val title = binding.etTitle.text.toString().trim()
-            val amount = binding.etAmount.text.toString().toDouble()
+            val amount = binding.etAmount.text.toString().toDoubleOrNull() ?: 0.0
             val category = selectedCategory?.name ?: ""
-            val currencyCode = prefs.getString("currency_code", "USD") ?: "USD"
+            val isIncome = currentType == TransactionType.INCOME
 
-            val isIncome = currentType == TransactionType.EXPENSE
+            if (title.isEmpty()) {
+                binding.etTitle.error = "Please enter a title"
+                return
+            }
+
+            if (amount <= 0) {
+                binding.etAmount.error = "Please enter a valid amount"
+                return
+            }
 
             val transaction = editingTransaction?.copy(
                 title = title,
@@ -294,20 +302,22 @@ class AddTransactionActivity : AppCompatActivity() {
                 date = selectedDate,
                 type = currentType,
                 isIncome = isIncome,
-                currencyCode = currencyCode
+                currencyCode = prefs.getString("currency_code", "USD") ?: "USD"
             ) ?: Transaction(
+                id = UUID.randomUUID().toString(),
                 title = title,
                 amount = amount,
                 category = category,
                 date = selectedDate,
                 type = currentType,
                 isIncome = isIncome,
-                currencyCode = currencyCode
+                currencyCode = prefs.getString("currency_code", "USD") ?: "USD"
             )
 
             repository.saveTransaction(transaction)
 
-            // Trigger budget check only for expense transactions
+            BackupHelper(this).backupUserData()
+
             if (currentType == TransactionType.EXPENSE) {
                 val budgetIntent = Intent(this, BudgetCheckService::class.java).apply {
                     action = BudgetCheckService.ACTION_CHECK_BUDGET
@@ -315,21 +325,23 @@ class AddTransactionActivity : AppCompatActivity() {
                 startService(budgetIntent)
             }
 
-            showSuccessMessage()
+            showSuccessSnackbar(if (editingTransaction != null) "Transaction updated!" else "Transaction added!")
             finish()
-            overridePendingTransition(R.anim.fade_in, R.anim.slide_out_bottom)
-
         } catch (e: Exception) {
-            Snackbar.make(binding.root, "Error saving transaction: ${e.message}", Snackbar.LENGTH_LONG).show()
+            showErrorSnackbar("Error saving transaction: ${e.message}")
         }
     }
 
-    private fun showSuccessMessage() {
-        val actionName = if (editingTransaction != null) "updated" else "added"
-        val typeName = if (currentType == TransactionType.EXPENSE) "Expense" else "Income"
-
-        Snackbar.make(binding.root, "$typeName $actionName successfully", Snackbar.LENGTH_SHORT)
+    private fun showSuccessSnackbar(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT)
             .setBackgroundTint(ContextCompat.getColor(this, R.color.success))
+            .setTextColor(ContextCompat.getColor(this, R.color.white))
+            .show()
+    }
+
+    private fun showErrorSnackbar(message: String) {
+        Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
+            .setBackgroundTint(ContextCompat.getColor(this, R.color.error))
             .setTextColor(ContextCompat.getColor(this, R.color.white))
             .show()
     }

@@ -1,5 +1,6 @@
 package com.example.spendly
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -21,12 +22,12 @@ class CategoryAdapter(
         return CategoryViewHolder(view)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val category = categories[position]
         holder.bind(category, context)
 
         holder.itemView.setOnClickListener {
-            // Update selected state
             categories.forEach { it.isSelected = false }
             category.isSelected = true
             notifyDataSetChanged()
@@ -43,14 +44,13 @@ class CategoryAdapter(
         private val name: TextView = itemView.findViewById(R.id.categoryName)
 
         fun bind(category: Category, context: Context) {
-            // Set icon and name
             icon.setImageResource(category.iconRes)
-            name.text = category.title // Use title for display
+            name.text = category.title
 
-            // Set color based on category
+
             val color = ContextCompat.getColor(context, category.colorRes)
 
-            // Apply selection state
+
             if (category.isSelected) {
                 cardView.setCardBackgroundColor(color)
                 name.setTextColor(ContextCompat.getColor(context, R.color.primary))

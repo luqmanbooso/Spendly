@@ -5,7 +5,7 @@ import androidx.annotation.DrawableRes
 
 data class Category(
     val id: String,
-    val title: String,  // This is the display name shown to users
+    val title: String,
     val name: String,
     @DrawableRes val iconRes: Int,
     @ColorRes val colorRes: Int,

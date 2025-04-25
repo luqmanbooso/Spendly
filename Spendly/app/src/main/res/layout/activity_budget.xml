@@ -17,7 +17,7 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="76dp"
             app:titleTextAppearance="@style/TextAppearance.Toolbar.Title"
             app:titleCentered="true"
             app:titleTextColor="@color/text_primary" />
@@ -26,7 +26,9 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
         android:fillViewport="true"
+        android:paddingTop="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
@@ -35,7 +37,6 @@
             android:orientation="vertical"
             android:paddingBottom="80dp">
 
-            <!-- Monthly Budget Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardMonthlyBudget"
                 android:layout_width="match_parent"
@@ -91,15 +92,14 @@
                                 android:insetRight="0dp"
                                 android:insetBottom="0dp"
                                 android:padding="8dp"
+                                app:icon="@drawable/ic_delete"
                                 app:iconGravity="textStart"
                                 app:iconPadding="0dp"
-                                app:icon="@drawable/ic_delete"
                                 app:iconTint="@color/expense"
                                 app:strokeColor="@color/expense" />
                         </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Budget Set Layout -->
                     <LinearLayout
                         android:id="@+id/layoutBudgetSet"
                         android:layout_width="match_parent"
@@ -107,8 +107,6 @@
                         android:orientation="vertical"
                         android:visibility="visible">
 
-                        <!-- Budget information content -->
-                        <!-- Keep existing content here -->
 
                         <TextView
                             android:id="@+id/tvMonthlyBudget"
@@ -216,13 +214,12 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <!-- No Budget Layout -->
                     <LinearLayout
                         android:id="@+id/layoutNoBudget"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:gravity="center"
+                        android:orientation="vertical"
                         android:visibility="gone">
 
                         <ImageView
@@ -253,20 +250,18 @@
                             android:textColor="@color/text_secondary"
                             android:textSize="14sp" />
 
-                        <!-- This is the first btnCreateBudget -->
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnCreateBudget"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
-                            android:text="@string/set_budget_now"
                             android:backgroundTint="@color/primary"
+                            android:text="@string/set_budget_now"
                             app:icon="@drawable/ic_add" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Category Budgets Section -->
             <LinearLayout
                 android:id="@+id/categoryBudgetsHeader"
                 android:layout_width="match_parent"
@@ -297,7 +292,6 @@
                     app:strokeColor="@color/primary" />
             </LinearLayout>
 
-            <!-- Category budgets recycler view -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvCategoryBudgets"
                 android:layout_width="match_parent"
@@ -309,7 +303,6 @@
                 android:visibility="visible"
                 tools:listitem="@layout/item_category_budget" />
 
-            <!-- Empty state for category budgets -->
             <LinearLayout
                 android:id="@+id/layoutEmptyCategoryBudgets"
                 android:layout_width="match_parent"
@@ -356,7 +349,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation Layout -->
     <include
         android:id="@+id/bottom_nav_container"
         layout="@layout/layout_bottom_nav"

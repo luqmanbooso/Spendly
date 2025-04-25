@@ -11,38 +11,29 @@ class OnboardingPageTransformer : ViewPager2.PageTransformer {
             val pageWidth = width
 
             when {
-                // Page is offscreen to the right
                 position > 1 -> {
                     alpha = 0f
                 }
 
-                // Page is entering from the right
                 position > 0 -> {
-                    // Counteract the default ViewPager slide transition
                     translationX = -position * pageWidth
 
-                    // Scale the page down
                     val scaleFactor = max(MIN_SCALE, 1 - position)
                     scaleX = scaleFactor
                     scaleY = scaleFactor
 
-                    // Fade out as it moves off screen
                     alpha = max(MIN_ALPHA, 1 - position)
 
-                    // Elevate the center page
                     translationZ = -position
                 }
 
-                // Page is the center page or entering from the left
                 position <= 0 -> {
-                    // Center the page
                     translationX = 0f
                     scaleX = 1f
                     scaleY = 1f
                     alpha = 1f
                     translationZ = 0f
 
-                    // Find and animate the image and text elements
                     val title = page.findViewById<View>(R.id.onboardingTitle)
                     val desc = page.findViewById<View>(R.id.onboardingDesc)
 
@@ -52,7 +43,6 @@ class OnboardingPageTransformer : ViewPager2.PageTransformer {
                     desc?.alpha = 1 + position * 3
                 }
 
-                // Page is offscreen to the left
                 else -> {
                     alpha = 0f
                 }

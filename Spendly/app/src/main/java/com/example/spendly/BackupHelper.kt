@@ -3,40 +3,28 @@ package com.example.spendly
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import com.opencsv.CSVWriter
 import org.json.JSONObject
 import org.json.JSONArray
 import org.json.JSONException
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
 
-/**
- * Helper class for backup, restore and export functionality
- */
+
 class BackupHelper(private val context: Context) {
 
-    private val prefs = context.getSharedPreferences("com.example.spendly_preferences", Context.MODE_PRIVATE)
+    private val prefsManager = PrefsManager(context)
     private val transactionRepository = TransactionRepository(context)
 
-    /**
-     * Creates a full backup of app data including preferences and transactions
-     */
     fun backupUserData(): Boolean {
         try {
-            // Get shared preferences
             val settingsPrefs = context.getSharedPreferences("com.example.spendly_preferences", Context.MODE_PRIVATE)
-            val budgetPrefs = context.getSharedPreferences("budgets", Context.MODE_PRIVATE)
             val userPrefs = context.getSharedPreferences("user_profile", Context.MODE_PRIVATE)
-            val transactionPrefs = context.getSharedPreferences("transactions", Context.MODE_PRIVATE)
 
-            // Create JSON object to store all data
             val backupData = JSONObject()
 
-            // Add settings
             val settingsData = JSONObject()
             for (entry in settingsPrefs.all.entries) {
                 when (entry.value) {
@@ -50,7 +38,6 @@ class BackupHelper(private val context: Context) {
             }
             backupData.put("settings", settingsData)
 
-            // Add transactions
             val transactions = transactionRepository.getAllTransactions()
             val transactionsArray = JSONArray()
             for (transaction in transactions) {
@@ -64,24 +51,30 @@ class BackupHelper(private val context: Context) {
                     put("isIncome", transaction.isIncome)
                 }
                 transactionsArray.put(transactionObj)
+                Log.d("BackupHelper", "Backed up transaction: ${transaction.title}")
             }
             backupData.put("transactions", transactionsArray)
+            Log.d("BackupHelper", "Backed up ${transactions.size} transactions")
 
-            // Add budgets
-            val budgetsData = JSONObject()
-            for (entry in budgetPrefs.all.entries) {
-                when (entry.value) {
-                    is Boolean -> budgetsData.put(entry.key, entry.value as Boolean)
-                    is String -> budgetsData.put(entry.key, entry.value as String)
-                    is Int -> budgetsData.put(entry.key, entry.value as Int)
-                    is Float -> budgetsData.put(entry.key, entry.value as Float)
-                    is Long -> budgetsData.put(entry.key, entry.value as Long)
-                    else -> budgetsData.put(entry.key, entry.value.toString())
-                }
+            val budgetData = JSONObject().apply {
+                put("monthly_budget", prefsManager.getMonthlyBudget())
+                put("currency_symbol", prefsManager.getCurrencySymbol())
+                put("notify_budget_warning", prefsManager.shouldNotifyBudgetWarning())
+                put("budget_warning_threshold", prefsManager.getBudgetWarningThreshold())
+                put("show_daily_reminders", prefsManager.shouldShowDailyReminders())
+                put("reminder_time", prefsManager.getReminderTime())
             }
-            backupData.put("budgets", budgetsData)
+            backupData.put("budget_settings", budgetData)
 
-            // Add user profile
+            val categoryBudgets = JSONObject()
+            val categories = listOf("food", "transport", "bills", "entertainment", 
+                "shopping", "health", "education", "other")
+            for (category in categories) {
+                val budget = prefsManager.getCategoryBudget(category)
+                categoryBudgets.put(category, budget)
+            }
+            backupData.put("category_budgets", categoryBudgets)
+
             val userData = JSONObject()
             for (entry in userPrefs.all.entries) {
                 when (entry.value) {
@@ -95,17 +88,14 @@ class BackupHelper(private val context: Context) {
             }
             backupData.put("user_profile", userData)
 
-            // Create filename with date
             val dateFormat = SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.getDefault())
             val backupFileName = "spendly_backup_${dateFormat.format(Date())}.json"
 
-            // Create a directory for backups if it doesn't exist
             val backupDir = File(context.filesDir, "backups")
             if (!backupDir.exists()) {
                 backupDir.mkdirs()
             }
 
-            // Write to file
             val file = File(backupDir, backupFileName)
             FileOutputStream(file).use {
                 it.write(backupData.toString().toByteArray())
@@ -120,14 +110,10 @@ class BackupHelper(private val context: Context) {
         }
     }
 
-    /**
-     * Exports transactions and budgets as JSON
-     */
     fun exportDataAsJson(): String {
         val jsonObject = JSONObject()
 
         try {
-            // Add transactions
             val transactions = transactionRepository.getAllTransactions()
             val transactionsArray = JSONArray()
             for (transaction in transactions) {
@@ -144,7 +130,6 @@ class BackupHelper(private val context: Context) {
             }
             jsonObject.put("transactions", transactionsArray)
 
-            // Add budgets
             val budgetPrefs = context.getSharedPreferences("budgets", Context.MODE_PRIVATE)
             val budgetsData = JSONObject()
             for (entry in budgetPrefs.all.entries) {
@@ -159,22 +144,18 @@ class BackupHelper(private val context: Context) {
             }
             jsonObject.put("budgets", budgetsData)
 
-            return jsonObject.toString(2) // Pretty print with 2 spaces indentation
+            return jsonObject.toString(2)
         } catch (e: Exception) {
             Log.e("BackupHelper", "Error exporting data: ${e.message}", e)
             throw e
         }
     }
 
-    /**
-     * Exports transactions and budgets as text
-     */
     fun exportDataAsText(): String {
         val stringBuilder = StringBuilder()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
 
         try {
-            // Add transactions
             stringBuilder.append("=== TRANSACTIONS ===\n\n")
             val transactions = transactionRepository.getAllTransactions()
             for (transaction in transactions) {
@@ -188,7 +169,6 @@ class BackupHelper(private val context: Context) {
                 stringBuilder.append("-------------------\n")
             }
 
-            // Add budgets
             stringBuilder.append("\n=== BUDGETS ===\n\n")
             val budgetPrefs = context.getSharedPreferences("budgets", Context.MODE_PRIVATE)
             for (entry in budgetPrefs.all.entries) {
@@ -202,9 +182,6 @@ class BackupHelper(private val context: Context) {
         }
     }
 
-    /**
-     * Parses text format backup data into JSON format
-     */
     private fun parseTextBackup(textData: String): JSONObject {
         val jsonObject = JSONObject()
         val transactionsArray = JSONArray()
@@ -279,7 +256,6 @@ class BackupHelper(private val context: Context) {
                 }
             }
 
-            // Add the last transaction if exists
             if (currentTransaction != null) {
                 transactionsArray.put(currentTransaction)
             }
@@ -294,23 +270,17 @@ class BackupHelper(private val context: Context) {
         return jsonObject
     }
 
-    /**
-     * Restores user data from a backup file
-     */
     fun restoreUserData(backupData: String): Boolean {
         return try {
             val jsonObject = JSONObject(backupData)
 
-            // Restore settings
             if (jsonObject.has("settings")) {
-            val settingsPrefs = context.getSharedPreferences("com.example.spendly_preferences", Context.MODE_PRIVATE)
+                val settingsPrefs = context.getSharedPreferences("com.example.spendly_preferences", Context.MODE_PRIVATE)
                 val settingsData = jsonObject.getJSONObject("settings")
-            val settingsEditor = settingsPrefs.edit()
+                val settingsEditor = settingsPrefs.edit()
 
-                // Clear existing settings
                 settingsEditor.clear()
 
-                // Process keys, handling boolean values specially
                 val keys = settingsData.keys()
                 val booleanKeys = listOf("budget_alerts", "daily_reminder")
 
@@ -341,10 +311,11 @@ class BackupHelper(private val context: Context) {
                 Log.d("BackupHelper", "Settings restored successfully")
             }
 
-            // Restore transactions
             if (jsonObject.has("transactions")) {
                 val transactionsArray = jsonObject.getJSONArray("transactions")
                 val transactionList = mutableListOf<Transaction>()
+
+                transactionRepository.deleteAllTransactions()
 
                 for (i in 0 until transactionsArray.length()) {
                     val transactionObj = transactionsArray.getJSONObject(i)
@@ -362,49 +333,47 @@ class BackupHelper(private val context: Context) {
                     Log.d("BackupHelper", "Restored transaction: ${transaction.title}")
                 }
 
-                // Save each transaction individually
                 for (transaction in transactionList) {
                     transactionRepository.saveTransaction(transaction)
                 }
                 Log.d("BackupHelper", "Restored ${transactionList.size} transactions")
             }
 
-            // Restore budgets
-            if (jsonObject.has("budgets")) {
-            val budgetPrefs = context.getSharedPreferences("budgets", Context.MODE_PRIVATE)
-                val budgetsData = jsonObject.getJSONObject("budgets")
-            val budgetEditor = budgetPrefs.edit()
+            if (jsonObject.has("budget_settings")) {
+                val budgetData = jsonObject.getJSONObject("budget_settings")
+                val monthlyBudget = budgetData.optDouble("monthly_budget", 0.0)
+                val currencySymbol = budgetData.optString("currency_symbol", "$")
+                val notifyBudgetWarning = budgetData.optBoolean("notify_budget_warning", true)
+                val budgetWarningThreshold = budgetData.optInt("budget_warning_threshold", 80)
+                val showDailyReminders = budgetData.optBoolean("show_daily_reminders", true)
+                val reminderTime = budgetData.optString("reminder_time", "20:00")
 
-                // Clear existing data first
-                budgetEditor.clear()
+                prefsManager.setMonthlyBudget(monthlyBudget)
+                prefsManager.setCurrencySymbol(currencySymbol)
+                prefsManager.setShouldNotifyBudgetWarning(notifyBudgetWarning)
+                prefsManager.setBudgetWarningThreshold(budgetWarningThreshold)
+                prefsManager.setShouldShowDailyReminders(showDailyReminders)
+                prefsManager.setReminderTime(reminderTime)
 
-                val keys = budgetsData.keys()
-                while (keys.hasNext()) {
-                    val key = keys.next()
-                    val value = budgetsData[key]
-                    
-                    when (value) {
-                        is Boolean -> budgetEditor.putBoolean(key, value)
-                        is String -> budgetEditor.putString(key, value)
-                        is Int -> budgetEditor.putInt(key, value)
-                        is Long -> budgetEditor.putLong(key, value)
-                        is Float -> budgetEditor.putFloat(key, value)
-                        is Double -> budgetEditor.putFloat(key, value.toFloat())
-                        else -> budgetEditor.putString(key, value.toString())
-                    }
-                    Log.d("BackupHelper", "Restored budget: $key = $value")
-                }
-                budgetEditor.apply()
-                Log.d("BackupHelper", "Budgets restored successfully")
+                Log.d("BackupHelper", "Budget settings restored: monthly_budget=$monthlyBudget, currency=$currencySymbol")
             }
 
-            // Restore user profile
+            if (jsonObject.has("category_budgets")) {
+                val categoryBudgets = jsonObject.getJSONObject("category_budgets")
+                val keys = categoryBudgets.keys()
+                while (keys.hasNext()) {
+                    val category = keys.next()
+                    val budget = categoryBudgets.getDouble(category)
+                    prefsManager.setCategoryBudget(category, budget)
+                    Log.d("BackupHelper", "Restored category budget: $category = $budget")
+                }
+            }
+
             if (jsonObject.has("user_profile")) {
                 val userPrefs = context.getSharedPreferences("user_profile", Context.MODE_PRIVATE)
                 val userData = jsonObject.getJSONObject("user_profile")
                 val userEditor = userPrefs.edit()
 
-                // Clear existing data first
                 userEditor.clear()
 
                 val keys = userData.keys()
@@ -434,73 +403,6 @@ class BackupHelper(private val context: Context) {
         }
     }
 
-    /**
-     * Exports the given list of transactions as a CSV file
-     */
-    fun exportTransactionsAsCSV(transactions: List<Transaction>): File {
-        // Create a directory for exports if it doesn't exist
-        val exportDir = File(context.filesDir, "exports")
-        if (!exportDir.exists()) {
-            exportDir.mkdirs()
-        }
-
-        // Create a new file with current timestamp
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "spendly_transactions_$timestamp.csv"
-        val file = File(exportDir, fileName)
-
-        file.bufferedWriter().use { writer ->
-            // Write CSV header
-            writer.write("ID,Date,Title,Amount,Category,Type,Note\n")
-
-            // Write transaction data
-            transactions.forEach { transaction ->
-                val date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    .format(Date(transaction.date))
-
-                val type = if (transaction.type == TransactionType.INCOME) "Income" else "Expense"
-
-                // Format as CSV line, properly escaping fields
-                val line = listOf(
-                    transaction.id,
-                    date,
-                    escapeCSV(transaction.title),
-                    transaction.amount.toString(),
-                    escapeCSV(transaction.category),
-                    type,
-                ).joinToString(",")
-
-                writer.write("$line\n")
-            }
-        }
-
-        Toast.makeText(context, "Transactions exported to CSV successfully", Toast.LENGTH_SHORT).show()
-        return file
-    }
-
-    /**
-     * Properly escapes strings for CSV format
-     */
-    private fun escapeCSV(input: String): String {
-        // If input contains commas, quotes, or newlines, wrap in quotes and escape any quotes
-        return if (input.contains(",") || input.contains("\"") || input.contains("\n")) {
-            "\"${input.replace("\"", "\"\"")}\""
-        } else {
-            input
-        }
-    }
-
-    /**
-     * Performs a full backup of all transactions
-     */
-    fun backupAllTransactions(repository: TransactionRepository): File {
-        val transactions = repository.getAllTransactions()
-        return exportTransactionsAsCSV(transactions)
-    }
-
-    /**
-     * Gets all backup files sorted by date (newest first)
-     */
     fun getBackupFiles(): List<File> {
         val backupDir = File(context.filesDir, "backups")
         if (!backupDir.exists()) {
@@ -513,75 +415,17 @@ class BackupHelper(private val context: Context) {
         }?.sortedByDescending { it.lastModified() }?.toList() ?: emptyList()
     }
 
-    /**
-     * Gets all export files
-     */
-    fun getExportFiles(): List<File> {
-        val exportDir = File(context.filesDir, "exports")
-        if (!exportDir.exists()) {
-            exportDir.mkdirs()
-            return emptyList()
-        }
-
-        return exportDir.listFiles { file ->
-            file.name.startsWith("spendly_transactions_") && file.name.endsWith(".csv")
-        }?.toList() ?: emptyList()
-    }
-
-    /**
-     * Export transactions to CSV file
-     */
-    fun exportTransactionsToCSV(transactions: List<Transaction>, csvFile: File): Boolean {
-        try {
-            val fileWriter = FileWriter(csvFile)
-            val csvWriter = CSVWriter(fileWriter)
-
-            // Write header
-            val header = arrayOf("Date", "Type", "Category", "Title", "Amount", "Notes")
-            csvWriter.writeNext(header)
-
-            // Write data
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-
-            for (transaction in transactions) {
-                val dateStr = dateFormat.format(Date(transaction.date))
-                val typeStr = if (transaction.type == TransactionType.INCOME) "Income" else "Expense"
-                val row = arrayOf(
-                    dateStr,
-                    typeStr,
-                    transaction.category,
-                    transaction.title,
-                    transaction.amount.toString(),
-                )
-                csvWriter.writeNext(row)
-            }
-
-            csvWriter.close()
-            fileWriter.close()
-            return true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return false
-        }
-    }
-
-    /**
-     * Import data from JSON string
-     */
     fun importFromJson(jsonString: String): Boolean {
         try {
             val backupData = JSONObject(jsonString)
 
-            // Restore settings - carefully handling type conversion
             if (backupData.has("settings")) {
                 val settingsPrefs = context.getSharedPreferences("com.example.spendly_preferences", Context.MODE_PRIVATE)
                 val settingsData = backupData.getJSONObject("settings")
                 val settingsEditor = settingsPrefs.edit()
 
-                // First, clear existing settings to avoid conflicts
                 settingsEditor.clear()
 
-                // Process keys, handling boolean values specially
                 val keys = settingsData.keys()
                 val booleanKeys = listOf("budget_alerts", "daily_reminder")
 
@@ -589,26 +433,22 @@ class BackupHelper(private val context: Context) {
                     val key = keys.next()
                     val valueStr = settingsData.getString(key)
 
-                    // Handle booleans specially
                     if (booleanKeys.contains(key)) {
                         val boolValue = valueStr.equals("true", ignoreCase = true)
                         settingsEditor.putBoolean(key, boolValue)
                         Log.d("BackupHelper", "Restored boolean preference: $key = $boolValue")
                     } else {
-                        // For other types, just store as string
                         settingsEditor.putString(key, valueStr)
                     }
                 }
                 settingsEditor.apply()
             }
 
-            // Restore transactions
             if (backupData.has("transactions")) {
                 val transactionPrefs = context.getSharedPreferences("transactions", Context.MODE_PRIVATE)
                 val transactionsData = backupData.getJSONObject("transactions")
                 val transactionEditor = transactionPrefs.edit()
 
-                // Clear existing data first
                 transactionEditor.clear()
 
                 val keys = transactionsData.keys()
@@ -619,13 +459,11 @@ class BackupHelper(private val context: Context) {
                 transactionEditor.apply()
             }
 
-            // Restore budgets
             if (backupData.has("budgets")) {
                 val budgetPrefs = context.getSharedPreferences("spendly_prefs", Context.MODE_PRIVATE)
                 val budgetsData = backupData.getJSONObject("budgets")
                 val budgetEditor = budgetPrefs.edit()
 
-                // Clear existing data first
                 budgetEditor.clear()
 
                 val keys = budgetsData.keys()

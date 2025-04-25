@@ -17,7 +17,7 @@ data class Transaction(
 ) : Parcelable {
     companion object {
         private fun getDefaultCurrencyCode(): String {
-            return "USD" // Default fallback
+            return "USD"
         }
     }
 }

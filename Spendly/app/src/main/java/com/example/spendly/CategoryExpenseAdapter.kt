@@ -29,10 +29,8 @@ class CategoryExpenseAdapter(
         holder.tvAmount.text = CurrencyFormatter.formatAmount(item.amount, currencySymbol)
         holder.tvPercentage.text = String.format("%.1f%%", item.percentage)
 
-        // Set progress bar
         holder.progressBar.progress = item.percentage.toInt()
 
-        // Set icon and color based on category
         when (item.category.lowercase()) {
             "food" -> {
                 holder.ivIcon.setImageResource(R.drawable.ic_category_food)
@@ -77,10 +75,10 @@ class CategoryExpenseAdapter(
     override fun getItemCount() = items.size
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val ivIcon: ImageView = view.findViewById(R.id.imgCategoryIcon) // Changed from ivCategoryIcon
+        val ivIcon: ImageView = view.findViewById(R.id.imgCategoryIcon)
         val tvCategory: TextView = view.findViewById(R.id.tvCategoryName)
-        val tvAmount: TextView = view.findViewById(R.id.tvAmount) // Changed from tvCategoryAmount
+        val tvAmount: TextView = view.findViewById(R.id.tvAmount)
         val tvPercentage: TextView = view.findViewById(R.id.tvPercentage)
-        val progressBar: ProgressBar = view.findViewById(R.id.progressBar) // Changed from progressBarCategory
+        val progressBar: ProgressBar = view.findViewById(R.id.progressBar)
     }
 }

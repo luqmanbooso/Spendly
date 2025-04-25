@@ -129,30 +129,44 @@ class MainActivity : AppCompatActivity() {
         }
 
         val monthlyBudget = prefsManager.getMonthlyBudget()
-        val remainingBudget = monthlyBudget - totalExpense
-        binding.tvRemainingBudget.text = CurrencyFormatter.formatAmount(remainingBudget, currencySymbol)
+        if (monthlyBudget > 0) {
+            val remainingBudget = monthlyBudget - totalExpense
+            binding.tvRemainingBudget.text = CurrencyFormatter.formatAmount(remainingBudget, currencySymbol)
+            binding.tvTotalBudget.text = "of ${CurrencyFormatter.formatAmount(monthlyBudget, currencySymbol)}"
 
-        val percentSpent = if (monthlyBudget > 0) {
-            (totalExpense / monthlyBudget * 100).toInt()
+            val percentSpent = if (monthlyBudget > 0) {
+                (totalExpense / monthlyBudget * 100).toInt()
+            } else {
+                0
+            }
+
+            binding.progressBudget.progress = percentSpent
+            binding.tvBudgetPercentage.text = "$percentSpent%"
+
+            val (statusText, colorId) = when {
+                percentSpent >= 100 -> Pair("Budget exceeded!", R.color.expense)
+                percentSpent >= 80 -> Pair("Getting close to limit!", R.color.warning)
+                percentSpent > 0 -> Pair("Budget on track", R.color.success)
+                else -> Pair("No expenses yet", R.color.text_secondary)
+            }
+
+            binding.tvBudgetStatus.text = statusText
+            binding.tvBudgetStatus.setTextColor(getColor(colorId))
+            binding.progressBudget.progressTintList = ColorStateList.valueOf(getColor(colorId))
         } else {
-            0
+            binding.tvRemainingBudget.text = CurrencyFormatter.formatAmount(0.0, currencySymbol)
+            binding.tvTotalBudget.text = "No budget set"
+            binding.tvBudgetStatus.text = "Set your monthly budget"
+            binding.tvBudgetStatus.setTextColor(getColor(R.color.text_secondary))
+            binding.progressBudget.progress = 0
+            binding.tvBudgetPercentage.text = "0%"
+            
+            binding.cardBudget.setOnClickListener {
+                val intent = Intent(this, BudgetActivity::class.java)
+                startActivity(intent)
+            }
         }
 
-        binding.progressBudget.progress = percentSpent
-        binding.tvBudgetPercentage.text = "$percentSpent%"
-
-        val (statusText, colorId) = when {
-            percentSpent >= 100 -> Pair("Budget exceeded!", R.color.expense)
-            percentSpent >= 80 -> Pair("Getting close to limit!", R.color.warning)
-            percentSpent > 0 -> Pair("Budget on track", R.color.success)
-            else -> Pair("No expenses yet", R.color.text_secondary)
-        }
-
-        binding.tvBudgetStatus.text = statusText
-        binding.tvBudgetStatus.setTextColor(getColor(colorId))
-        binding.progressBudget.progressTintList = ColorStateList.valueOf(getColor(colorId))
-
-        // Update Top Expense
         val expensesByCategory = transactionRepository.getExpensesByCategory()
         if (expensesByCategory.isNotEmpty()) {
             val topCategory = expensesByCategory.maxByOrNull { it.value }
@@ -160,7 +174,6 @@ class MainActivity : AppCompatActivity() {
                 binding.tvTopCategory.text = topCategory.key
                 binding.tvTopCategoryAmount.text = CurrencyFormatter.formatAmount(topCategory.value, currencySymbol)
                 
-                // Set category icon
                 when (topCategory.key.lowercase()) {
                     "food" -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_food)
                     "transport" -> binding.imgTopCategory.setImageResource(R.drawable.ic_category_transport)
@@ -174,7 +187,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Update Recent Activity
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)

@@ -38,12 +38,10 @@ class TransactionActivity : AppCompatActivity() {
         binding = ActivityTransactionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Initialize dependencies
         transactionRepository = TransactionRepository(this)
         prefsManager = PrefsManager(this)
         bottomNavHelper = BottomNavHelper(this, binding.root)
 
-        // Setup UI components
         setupToolbar()
         setupBottomNav()
         setupRecyclerView()
@@ -51,7 +49,6 @@ class TransactionActivity : AppCompatActivity() {
         setupEmptyState()
         setupButtons()
 
-        // Load initial data
         loadTransactions()
     }
 
@@ -75,21 +72,17 @@ class TransactionActivity : AppCompatActivity() {
     }
 
     private fun setupButtons() {
-        // Add "Add Transaction" button functionality
         binding.btnAddTransaction.setOnClickListener {
             startActivity(Intent(this, AddTransactionActivity::class.java))
             overridePendingTransition(R.anim.slide_up, R.anim.fade_out)
         }
 
-        // Date filter button functionality
         binding.btnDateFilter.setOnClickListener {
-            // Toggle date filter visibility
             if (binding.layoutDateFilter.visibility == View.VISIBLE) {
                 binding.layoutDateFilter.visibility = View.GONE
             } else {
                 binding.layoutDateFilter.visibility = View.VISIBLE
                 binding.layoutCategoryFilter.visibility = View.GONE
-                // Only change filter type if we're not already filtering by date
                 if (currentFilterType != FilterType.DATE) {
                     currentFilterType = FilterType.DATE
                     binding.chipAll.isChecked = false
@@ -101,25 +94,21 @@ class TransactionActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         binding.rvTransactions.layoutManager = LinearLayoutManager(this)
 
-        // Create empty list to start with
         val emptyList = mutableListOf<Transaction>()
 
         transactionAdapter = TransactionAdapter(
             emptyList,
             prefsManager.getCurrencySymbol(),
             onItemClick = { transaction ->
-                // When item is clicked, edit the transaction
                 editTransaction(transaction)
             },
             onDeleteClick = { transaction ->
-                // When delete icon is clicked, confirm deletion
                 confirmDeleteTransaction(transaction)
             }
         )
         binding.rvTransactions.adapter = transactionAdapter
     }
 
-    // Add this method to update transactions in the adapter
     private fun updateTransactionList(transactions: List<Transaction>) {
         if (transactions.isEmpty()) {
             binding.rvTransactions.visibility = View.GONE
@@ -136,22 +125,18 @@ class TransactionActivity : AppCompatActivity() {
             binding.rvTransactions.visibility = View.VISIBLE
             binding.emptyStateLayout.visibility = View.GONE
 
-            // Create a new adapter with the updated list
             transactionAdapter = TransactionAdapter(
                 transactions,
                 prefsManager.getCurrencySymbol(),
                 onItemClick = { transaction ->
-                    // When item is clicked, edit the transaction
                     editTransaction(transaction)
                 },
                 onDeleteClick = { transaction ->
-                    // When delete icon is clicked, confirm deletion
                     confirmDeleteTransaction(transaction)
                 }
             )
             binding.rvTransactions.adapter = transactionAdapter
 
-            // Add animation to recycler view items
             val animation = AnimationUtils.loadLayoutAnimation(this, R.anim.layout_animation_fall_down)
             binding.rvTransactions.layoutAnimation = animation
             binding.rvTransactions.scheduleLayoutAnimation()
@@ -159,7 +144,6 @@ class TransactionActivity : AppCompatActivity() {
     }
 
     private fun setupFilterOptions() {
-        // Setup chip group listener
         binding.chipGroupFilter.setOnCheckedStateChangeListener { group, checkedIds ->
             if (checkedIds.isNotEmpty()) {
                 val chip = findViewById<Chip>(checkedIds[0])
@@ -190,7 +174,6 @@ class TransactionActivity : AppCompatActivity() {
             }
         }
 
-        // Date filter buttons
         binding.btnStartDate.setOnClickListener {
             showDatePicker(true)
         }
@@ -199,17 +182,14 @@ class TransactionActivity : AppCompatActivity() {
             showDatePicker(false)
         }
 
-        // Category filter button
         binding.btnSelectCategory.setOnClickListener {
             showCategorySelector()
         }
 
-        // Set the "All" chip as default selected
         binding.chipAll.isChecked = true
     }
 
     private fun setupEmptyState() {
-        // Set up add transaction button in empty state
         binding.btnAddFirstTransaction.setOnClickListener {
             startActivity(Intent(this, AddTransactionActivity::class.java))
             overridePendingTransition(R.anim.slide_up, R.anim.fade_out)
@@ -217,7 +197,6 @@ class TransactionActivity : AppCompatActivity() {
     }
 
     private fun loadTransactions() {
-        // Get transactions based on filter
         val transactions = when (currentFilterType) {
             FilterType.ALL -> transactionRepository.getAllTransactions()
             FilterType.INCOME -> transactionRepository.getTransactionsByType(true)
@@ -245,7 +224,6 @@ class TransactionActivity : AppCompatActivity() {
             }
         }
 
-        // Update UI with transactions
         updateTransactionList(transactions)
         updateSummary(transactions)
     }
@@ -253,7 +231,6 @@ class TransactionActivity : AppCompatActivity() {
     private fun updateSummary(transactions: List<Transaction>) {
         val currencySymbol = prefsManager.getCurrencySymbol()
 
-        // Calculate totals
         var totalIncome = 0.0
         var totalExpense = 0.0
 
@@ -267,12 +244,10 @@ class TransactionActivity : AppCompatActivity() {
 
         val balance = totalIncome - totalExpense
 
-        // Update UI
         binding.tvTotalIncome.text = CurrencyFormatter.formatAmount(totalIncome, currencySymbol)
         binding.tvTotalExpense.text = CurrencyFormatter.formatAmount(totalExpense, currencySymbol)
         binding.tvBalance.text = CurrencyFormatter.formatAmount(balance, currencySymbol)
 
-        // Update header text based on filter
         val headerText = when (currentFilterType) {
             FilterType.ALL -> "All Transactions"
             FilterType.INCOME -> "Income Transactions"
@@ -332,7 +307,6 @@ class TransactionActivity : AppCompatActivity() {
     }
 
     private fun editTransaction(transaction: Transaction) {
-        // Launch edit transaction activity with the transaction data
         val intent = Intent(this, AddTransactionActivity::class.java)
         intent.putExtra("TRANSACTION_ID", transaction.id)
         intent.putExtra("IS_EDIT", true)
@@ -352,8 +326,10 @@ class TransactionActivity : AppCompatActivity() {
     }
 
     private fun deleteTransaction(transaction: Transaction) {
-        // Delete transaction and reload data
         transactionRepository.deleteTransaction(transaction.id)
+        
+        BackupHelper(this).backupUserData()
+        
         loadTransactions()
     }
 
@@ -379,5 +355,10 @@ class TransactionActivity : AppCompatActivity() {
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadTransactions()
     }
 }

@@ -16,7 +16,7 @@ class TransactionAdapter(
     private val transactions: List<Transaction>,
     private val currencySymbol: String,
     private val onItemClick: (Transaction) -> Unit,
-    private val onDeleteClick: ((Transaction) -> Unit)? = null  // Make delete click optional
+    private val onDeleteClick: ((Transaction) -> Unit)? = null
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -28,12 +28,10 @@ class TransactionAdapter(
         val transaction = transactions[position]
         holder.bind(transaction, currencySymbol)
 
-        // Set click listener for the item
         holder.itemView.setOnClickListener {
             onItemClick(transaction)
         }
 
-        // Set delete button visibility and click listener
         try {
             val deleteButton = holder.itemView.findViewById<ImageButton>(R.id.btnDelete)
             if (onDeleteClick != null) {
@@ -42,11 +40,10 @@ class TransactionAdapter(
                     onDeleteClick.invoke(transaction)
                 }
             } else {
-                // Hide delete button in MainActivity
                 deleteButton?.visibility = View.GONE
             }
         } catch (e: Exception) {
-            // Handle if delete button doesn't exist in some layouts
+            e.printStackTrace()
         }
     }
 
@@ -60,17 +57,13 @@ class TransactionAdapter(
         private val tvAmount: TextView = itemView.findViewById(R.id.tvAmount)
 
         fun bind(transaction: Transaction, currencySymbol: String) {
-            // Set title
             tvTitle.text = transaction.title
 
-            // Format date
             val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
             val formattedDate = dateFormat.format(Date(transaction.date))
 
-            // Set description (category and date)
             tvDescription.text = "${transaction.category} • $formattedDate"
 
-            // Set amount with appropriate format
             val context = itemView.context
             val amountStr = if (!transaction.isIncome) {
                 "-${CurrencyFormatter.formatAmount(transaction.amount, currencySymbol)}"
@@ -79,7 +72,6 @@ class TransactionAdapter(
             }
             tvAmount.text = amountStr
 
-            // Set text color based on transaction type (using isIncome for consistency)
             val amountColor = if (!transaction.isIncome) {
                 ContextCompat.getColor(context, R.color.expense)
             } else {
@@ -87,7 +79,6 @@ class TransactionAdapter(
             }
             tvAmount.setTextColor(amountColor)
 
-            // Set category icon and background (using isIncome for consistency)
             val iconResId = getCategoryIconResource(transaction.category, transaction.isIncome)
             imgCategoryIcon.setImageResource(iconResId)
 
@@ -95,7 +86,6 @@ class TransactionAdapter(
             cardCategoryIcon.setCardBackgroundColor(ContextCompat.getColor(context, categoryColorResId))
         }
 
-        // Your existing methods
         private fun getCategoryIconResource(category: String, isIncome: Boolean): Int {
             return when {
                 isIncome -> {
@@ -122,7 +112,6 @@ class TransactionAdapter(
         }
 
         private fun getCategoryColorResource(category: String, isIncome: Boolean): Int {
-            // Your existing code...
             return when {
                 isIncome -> {
                     when (category.lowercase()) {

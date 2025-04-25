@@ -1,6 +1,7 @@
 package com.example.spendly
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -22,19 +23,16 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        // Setup toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         toolbar.setNavigationOnClickListener { finishWithAnimation() }
 
-        // Initialize views
         editName = findViewById(R.id.editName)
         editEmail = findViewById(R.id.editEmail)
         saveButton = findViewById(R.id.btnSave)
 
-        // Apply entrance animation
         val container = findViewById<View>(R.id.profileContainer)
         container.alpha = 0f
         container.animate()
@@ -42,10 +40,8 @@ class ProfileActivity : AppCompatActivity() {
             .setDuration(300)
             .start()
 
-        // Load profile data
         loadProfileData()
 
-        // Save button click listener
         saveButton.setOnClickListener {
             saveProfileData()
         }
@@ -53,23 +49,27 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun loadProfileData() {
         val sharedPrefs = getSharedPreferences("user_profile", Context.MODE_PRIVATE)
-        val currentUserEmail = getCurrentUserEmail()
+        
+        editName.setText("")
+        editEmail.setText("")
 
-        if (!currentUserEmail.isNullOrEmpty()) {
-            // User is logged in, use UserManager to get name
-            val userManager = UserManager(this)
-            val userName = userManager.getCurrentUserName() ?: ""
+        val userManager = UserManager(this)
+        val currentUserEmail = userManager.getCurrentUserEmail()
+        val currentUserName = userManager.getCurrentUserName()
 
-            editName.setText(userName)
+        if (!currentUserEmail.isNullOrEmpty() && !currentUserName.isNullOrEmpty()) {
+            editName.setText(currentUserName)
             editEmail.setText(currentUserEmail)
-
-            Log.d("ProfileActivity", "Loaded profile data: $userName, $currentUserEmail")
+            Log.d("ProfileActivity", "Loaded profile from UserManager: $currentUserName, $currentUserEmail")
         } else {
-            // Fall back to shared prefs
-            editName.setText(sharedPrefs.getString("name", ""))
-            editEmail.setText(sharedPrefs.getString("email", ""))
-
-            Log.d("ProfileActivity", "Loaded profile from shared prefs")
+            val savedName = sharedPrefs.getString("name", null)
+            val savedEmail = sharedPrefs.getString("email", null)
+            
+            if (!savedName.isNullOrEmpty() && !savedEmail.isNullOrEmpty()) {
+                editName.setText(savedName)
+                editEmail.setText(savedEmail)
+                Log.d("ProfileActivity", "Loaded profile from shared prefs: $savedName, $savedEmail")
+            }
         }
     }
 
@@ -82,7 +82,6 @@ class ProfileActivity : AppCompatActivity() {
         val name = editName.text.toString().trim()
         val email = editEmail.text.toString().trim()
 
-        // Simple validation
         if (name.isEmpty()) {
             editName.error = "Name cannot be empty"
             return
@@ -93,13 +92,11 @@ class ProfileActivity : AppCompatActivity() {
             return
         }
 
-        // Email format validation
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             editEmail.error = "Please enter a valid email address"
             return
         }
 
-        // Save data to SharedPreferences - both to user_profile and current user
         try {
             val userPrefs = getSharedPreferences("user_profile", Context.MODE_PRIVATE)
             userPrefs.edit().apply {
@@ -108,22 +105,11 @@ class ProfileActivity : AppCompatActivity() {
                 apply()
             }
 
-            // Update the current user info if logged in
             val userManager = UserManager(this)
-            val currentUserEmail = userManager.getCurrentUserEmail()
-
-            if (!currentUserEmail.isNullOrEmpty()) {
-                // If email changed, update the logged in user
-                if (email != currentUserEmail) {
-                    userManager.saveUserEmail(email)
-                }
-
-                // We don't have a direct method to update userName in UserManager,
-                // but next time it will load from user_profile
-            }
+            userManager.saveUserEmail(email)
+            userManager.saveUserName(name)
 
             Log.d("ProfileActivity", "Profile updated: $name, $email")
-
             Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
             finishWithAnimation()
         } catch (e: Exception) {
@@ -140,6 +126,7 @@ class ProfileActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
     override fun onBackPressed() {
         super.onBackPressed()
         finishWithAnimation()
@@ -151,6 +138,12 @@ class ProfileActivity : AppCompatActivity() {
             .alpha(0f)
             .setDuration(300)
             .withEndAction {
+                val resultIntent = Intent().apply {
+                    putExtra("name", editName.text.toString().trim())
+                    putExtra("email", editEmail.text.toString().trim())
+                }
+                setResult(RESULT_OK, resultIntent)
+                
                 finish()
                 overridePendingTransition(R.anim.fade_in, R.anim.slide_down)
             }

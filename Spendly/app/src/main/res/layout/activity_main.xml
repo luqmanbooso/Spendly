@@ -21,7 +21,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Enhanced App Header with Logo, Name and Settings -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardHeader"
                 android:layout_width="match_parent"
@@ -34,7 +33,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!-- Enhanced Header Section -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -70,7 +68,6 @@
 
                         </LinearLayout>
 
-                        <!-- Enhanced Settings Button -->
                         <com.google.android.material.card.MaterialCardView
                             android:layout_width="42dp"
                             android:layout_height="42dp"
@@ -93,7 +90,6 @@
 
                     </LinearLayout>
 
-                    <!-- Enhanced Greeting Section with Card -->
                     <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -138,28 +134,18 @@
                                 android:text="Tuesday, 22 Apr 2025"
                                 android:textColor="@color/text_secondary"
                                 android:textSize="14sp" />
-<!--                            <Button-->
-<!--                                android:id="@+id/btnTestNotification"-->
-<!--                                android:layout_width="wrap_content"-->
-<!--                                android:layout_height="wrap_content"-->
-<!--                                android:text="Test Notification"-->
-<!--                                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                                android:layout_margin="16dp" />-->
 
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Main Content with enhanced spacing and styling -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <!-- Dashboard Title with better typography -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -184,7 +170,6 @@
                         android:textSize="15sp" />
                 </LinearLayout>
 
-                <!-- Enhanced Balance Card with Shadow and Gradient -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardBalance"
                     android:layout_width="match_parent"
@@ -270,7 +255,6 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
 
-                            <!-- Enhanced Income Section -->
                             <LinearLayout
                                 android:id="@+id/incomeSection"
                                 android:layout_width="0dp"
@@ -318,7 +302,6 @@
                                 android:layout_marginHorizontal="16dp"
                                 android:background="#20FFFFFF" />
 
-                            <!-- Enhanced Expense Section -->
                             <LinearLayout
                                 android:id="@+id/expenseSection"
                                 android:layout_width="0dp"
@@ -363,7 +346,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Enhanced Budget Status Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardBudget"
                     android:layout_width="match_parent"
@@ -492,14 +474,12 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Enhanced Quick Stats Cards -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:orientation="horizontal">
 
-                    <!-- Enhanced Top Category Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardTopCategory"
                         android:layout_width="0dp"
@@ -570,7 +550,6 @@
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Enhanced Recent Activity Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardRecentActivity"
                         android:layout_width="0dp"
@@ -617,7 +596,6 @@
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <!-- Enhanced Recent Transactions Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -651,7 +629,6 @@
                         app:iconTint="@color/accent" />
                 </LinearLayout>
 
-                <!-- Enhanced Empty state for transactions -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/emptyTransactionState"
                     android:layout_width="match_parent"
@@ -703,7 +680,6 @@
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <!-- Recent Transactions List with Card Wrapper -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -725,7 +701,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Enhanced Bottom Navigation with FAB -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/bottomNavCard"
         android:layout_width="match_parent"

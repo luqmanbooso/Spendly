@@ -35,7 +35,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Elegant Transaction Type Selector with Refined Styling -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -87,7 +86,6 @@
                     </com.google.android.material.tabs.TabLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-            <!-- Enhanced Amount Input Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -104,7 +102,6 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <!-- Amount Input with large display -->
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -159,7 +156,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Transaction Details Card with Validation -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -183,7 +179,6 @@
                         android:textColor="@color/text_primary"
                         android:textSize="18sp" />
 
-                    <!-- Title Input -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilTitle"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -213,7 +208,6 @@
                             android:textSize="16sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Date Picker -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilDate"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -251,7 +245,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Categories Section with Professional Design -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -306,7 +299,6 @@
                             android:visibility="gone" />
                     </LinearLayout>
 
-                    <!-- Category Grid Container with Professional Icons -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvCategories"
                         android:layout_width="match_parent"
@@ -324,7 +316,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Save Button with Elegant Design -->
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
         android:layout_width="match_parent"

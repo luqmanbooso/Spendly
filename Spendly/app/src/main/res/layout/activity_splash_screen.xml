@@ -45,6 +45,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appTitle" />
 
+    <View
+        android:id="@+id/divider"
+        android:layout_width="120dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/accent_yellow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appTagline" />
+
     <ViewFlipper
         android:id="@+id/textFlipper"
         android:layout_width="match_parent"
@@ -55,7 +65,7 @@
         android:outAnimation="@anim/slide_down_fade_out"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appTagline">
+        app:layout_constraintTop_toBottomOf="@+id/divider">
 
         <TextView
             android:layout_width="match_parent"
@@ -69,7 +79,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_thin"
+            android:fontFamily="@font/poppins"
             android:text="Set budgets that work for you"
             android:textAlignment="center"
             android:textColor="#E0E6FF"
@@ -78,7 +88,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_thin"
+            android:fontFamily="@font/poppins"
             android:text="Gain insights on your finances"
             android:textAlignment="center"
             android:textColor="#E0E6FF"
@@ -87,7 +97,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_thin"
+            android:fontFamily="@font/poppins"
             android:text="Take control of your money"
             android:textAlignment="center"
             android:textColor="#E0E6FF"

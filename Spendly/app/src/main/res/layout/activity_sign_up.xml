@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@drawable/gradient_background"
     android:padding="24dp"
     tools:context=".SignUpActivity">
 
@@ -15,7 +15,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Back Button"
         android:src="@drawable/ic_back"
-        android:tint="@color/text_primary"
+        android:tint="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -26,29 +26,47 @@
         android:layout_marginTop="16dp"
         android:fontFamily="@font/poppins_bold"
         android:text="Create Account"
-        android:textColor="@color/text_primary"
-        android:textSize="28sp"
+        android:textColor="@color/white"
+        android:textSize="32sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnBack" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp"
-        android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@+id/loginContainer"
+    <TextView
+        android:id="@+id/tvSignUpPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/poppins"
+        android:text="Join us to start managing your finances"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:alpha="0.8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvCreateAccount">
+        app:layout_constraintTop_toBottomOf="@+id/tvCreateAccount" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/signupCard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="32dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/loginContainer"
+        app:layout_constraintTop_toBottomOf="@+id/tvSignUpPrompt">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
         <LinearLayout
-            android:id="@+id/signupForm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="16dp">
+                android:padding="24dp">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilName"
@@ -57,14 +75,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Full Name"
-                android:textColorHint="@color/primary_text"
-                app:hintTextColor="@color/black"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusTopStart="12dp"
                 app:errorEnabled="true"
-                app:startIconDrawable="@drawable/ic_person">
+                    app:startIconDrawable="@drawable/ic_person"
+                    app:startIconTint="@color/primary_dark">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etName"
@@ -82,14 +99,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Email Address"
-                android:textColorHint="@color/primary_text"
-                app:hintTextColor="@color/black"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusTopStart="12dp"
                 app:errorEnabled="true"
-                app:startIconDrawable="@drawable/ic_email">
+                    app:startIconDrawable="@drawable/ic_email"
+                    app:startIconTint="@color/primary_dark">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEmail"
@@ -106,8 +122,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:textColorHint="@color/primary_text"
-                app:hintTextColor="@color/black"
                 android:hint="Password"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
@@ -115,7 +129,8 @@
                 app:boxCornerRadiusTopStart="12dp"
                 app:errorEnabled="true"
                 app:passwordToggleEnabled="true"
-                app:startIconDrawable="@drawable/ic_lock">
+                    app:startIconDrawable="@drawable/ic_lock"
+                    app:startIconTint="@color/primary_dark">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etPassword"
@@ -133,15 +148,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:hint="Confirm Password"
-                android:textColorHint="@color/primary_text"
-                app:hintTextColor="@color/black"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
                 app:boxCornerRadiusTopEnd="12dp"
                 app:boxCornerRadiusTopStart="12dp"
                 app:errorEnabled="true"
                 app:passwordToggleEnabled="true"
-                app:startIconDrawable="@drawable/ic_lock">
+                    app:startIconDrawable="@drawable/ic_lock"
+                    app:startIconTint="@color/primary_dark">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etConfirmPassword"
@@ -159,16 +173,16 @@
                 android:layout_marginTop="16dp"
                 android:backgroundTint="@color/primary_dark"
                 android:enabled="false"
-                android:fontFamily="@font/poppins"
+                    android:fontFamily="@font/poppins_bold"
                 android:padding="14dp"
-                android:textColor="@color/white"
                 android:text="Sign Up"
                 android:textAllCaps="false"
+                    android:textColor="@color/white"
                 android:textSize="16sp"
                 app:cornerRadius="16dp" />
-
         </LinearLayout>
     </ScrollView>
+    </androidx.cardview.widget.CardView>
 
     <LinearLayout
         android:id="@+id/loginContainer"
@@ -184,9 +198,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/poppins_bold"
+            android:fontFamily="@font/poppins"
             android:text="Already have an account? "
-            android:textColor="@color/text_secondary"
+            android:textColor="@color/white"
             android:textSize="14sp" />
 
         <TextView
@@ -196,9 +210,8 @@
             android:fontFamily="@font/poppins_bold"
             android:padding="4dp"
             android:text="Login"
-            android:textColor="@color/primary"
+            android:textColor="@color/accent_yellow"
             android:textSize="14sp" />
-
     </LinearLayout>
 
     <ProgressBar

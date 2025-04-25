@@ -1,65 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary Color (60%) -->
-    <color name="primary">#5D67E9</color> <!-- Blue -->
-    <color name="primary_dark">#2D3AF0</color> <!-- Darker Blue -->
-    <color name="accent">#FF9800</color> <!-- Light Orange -->
+    <color name="primary">#5D67E9</color>
+    <color name="primary_dark">#2D3AF0</color>
+    <color name="accent">#FF9800</color>
 
-    <color name="white">#FFFFFF</color> <!-- Light Orange -->
+    <color name="white">#FFFFFF</color>
 
-    <color name="black">#000000</color> <!-- Light Orange -->
+    <color name="black">#000000</color>
 
     <color name="ripple_color">#404F46E5</color>
-    <!-- Text Colors -->
-    <color name="text_primary">#212121</color> <!-- Dark Gray -->
-    <color name="text_secondary">#757575</color> <!-- Light Gray -->
-    <color name="primary_text">#212121</color> <!-- Dark Gray -->
-    <color name="secondary_text">#757575</color> <!-- Light Gray -->
 
-    <!-- Indicator colors -->
-    <color name="indicator_unselected">#CCCCCC</color> <!-- Light Gray -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
 
-    <color name="error">#F44336</color> <!-- Red -->
-    <color name="gray_light">#F5F5F5</color> <!-- Light Gray -->
+    <color name="indicator_unselected">#CCCCCC</color>
 
-    <color name="success">#4CAF50</color> <!-- Green -->
-    <color name="expense">#F44336</color> <!-- Red -->
-    <color name="warning">#FFC107</color> <!-- Yellow -->
+    <color name="error">#F44336</color>
+    <color name="gray_light">#F5F5F5</color>
 
-    <color name="background_light">#F5F7FA</color> <!-- Light Gray Background -->
+    <color name="success">#4CAF50</color>
+    <color name="expense">#F44336</color>
+    <color name="warning">#FFC107</color>
 
-    <color name="icon_active">#5D67E9</color> <!-- Blue -->
-    <color name="icon_inactive">#BBBBBB</color> <!-- Light Gray -->
+    <color name="background_light">#F5F7FA</color>
 
-    <color name="success_light">#8BC34A</color> <!-- Light Green -->
+    <color name="icon_active">#5D67E9</color>
+    <color name="icon_inactive">#BBBBBB</color>
 
-    <!-- Secondary Color (30%) -->
-    <color name="secondary">#00D7FF</color> <!-- Light Blue -->
-    <color name="secondary_light">#F0F8FF</color> <!-- Very Light Blue -->
+    <color name="success_light">#8BC34A</color>
 
-    <!-- Accent Colors (10%) -->
-    <color name="accent_green">#4CAF50</color> <!-- Green -->
-    <color name="accent_red">#F44336</color> <!-- Red -->
-    <color name="accent_yellow">#FFC107</color> <!-- Yellow -->
+    <color name="secondary">#00D7FF</color>
+    <color name="secondary_light">#F0F8FF</color>
 
-    <!-- Category Colors -->
-    <color name="category_food">#F44336</color> <!-- Red -->
-    <color name="category_transport">#FF9800</color> <!-- Orange -->
-    <color name="category_bills">#3F51B5</color> <!-- Blue -->
-    <color name="category_entertainment">#9C27B0</color> <!-- Purple -->
-    <color name="category_shopping">#2196F3</color> <!-- Blue -->
-    <color name="category_health">#E91E63</color> <!-- Pink -->
-    <color name="category_education">#009688</color> <!-- Teal -->
-    <color name="category_other">#607D8B</color> <!-- Gray -->
-    <color name="category_salary">#4CAF50</color> <!-- Green -->
-    <color name="category_business">#FF5722</color> <!-- Deep Orange -->
-    <color name="category_investment">#03A9F4</color> <!-- Light Blue -->
-    <color name="category_gift">#673AB7</color> <!-- Purple -->
-    <color name="category_tag_background">#604CAF50</color> <!-- Dark Green -->
+    <color name="accent_green">#4CAF50</color>
+    <color name="accent_red">#F44336</color>
+    <color name="accent_yellow">#FFC107</color>
 
-    <color name="income">#33C33A</color> <!-- Green -->
-    <color name="chip_background_checked">#5E50F9</color> <!-- Purple -->
-    <color name="chip_background_unchecked">#F5F5F5</color> <!-- Light Gray -->
-    <color name="chip_text_checked">#FFFFFF</color> <!-- White -->
-    <color name="chip_text_unchecked">#757575</color> <!-- Light Gray -->
+    <color name="category_food">#F44336</color>
+    <color name="category_transport">#FF9800</color>
+    <color name="category_bills">#3F51B5</color>
+    <color name="category_entertainment">#9C27B0</color>
+    <color name="category_shopping">#2196F3</color>
+    <color name="category_health">#E91E63</color>
+    <color name="category_education">#009688</color>
+    <color name="category_other">#607D8B</color>
+    <color name="category_salary">#4CAF50</color>
+    <color name="category_business">#FF5722</color>
+    <color name="category_investment">#03A9F4</color>
+    <color name="category_gift">#673AB7</color>
+    <color name="category_tag_background">#604CAF50</color>
+
+    <color name="income">#33C33A</color>
+    <color name="chip_background_checked">#5E50F9</color>
+    <color name="chip_background_unchecked">#F5F5F5</color>
+    <color name="chip_text_checked">#FFFFFF</color>
+    <color name="chip_text_unchecked">#757575</color>
 </resources>

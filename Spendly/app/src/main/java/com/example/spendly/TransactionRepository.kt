@@ -1,6 +1,7 @@
 package com.example.spendly
 
 import android.content.Context
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -15,20 +16,17 @@ class TransactionRepository(private val context: Context) {
     fun saveTransaction(transaction: Transaction) {
         val transactions = getAllTransactions().toMutableList()
 
-        // Check if transaction already exists (for edit)
         val index = transactions.indexOfFirst { it.id == transaction.id }
         if (index >= 0) {
-            // Update existing
             transactions[index] = transaction
+            Log.d("TransactionRepository", "Updated transaction: ${transaction.title}")
         } else {
-            // Add new
             transactions.add(transaction)
+            Log.d("TransactionRepository", "Added new transaction: ${transaction.title}")
         }
 
-        // Sort by date (newest first)
         transactions.sortByDescending { it.date }
 
-        // Save to SharedPreferences
         saveTransactionsToPrefs(transactions)
     }
 
@@ -36,7 +34,6 @@ class TransactionRepository(private val context: Context) {
         val transactions = getAllTransactions().toMutableList()
         transactions.removeIf { it.id == id }
 
-        // Save updated list
         saveTransactionsToPrefs(transactions)
     }
 
@@ -95,37 +92,31 @@ class TransactionRepository(private val context: Context) {
         sharedPreferences.edit().putString(KEY_TRANSACTIONS, jsonArray.toString()).apply()
     }
 
-    // NEW METHODS
 
-    // Get transactions by category
     fun getTransactionsByCategory(category: String): List<Transaction> {
         return getAllTransactions()
             .filter { it.category.equals(category, ignoreCase = true) }
             .sortedByDescending { it.date }
     }
 
-    // Get transactions before a specific date
     fun getTransactionsBeforeDate(date: Long): List<Transaction> {
         return getAllTransactions()
             .filter { it.date <= date }
             .sortedByDescending { it.date }
     }
 
-    // Get transactions after a specific date
     fun getTransactionsAfterDate(date: Long): List<Transaction> {
         return getAllTransactions()
             .filter { it.date >= date }
             .sortedByDescending { it.date }
     }
 
-    // Get transactions by type (income/expense)
     fun getTransactionsByType(isIncome: Boolean): List<Transaction> {
         return getAllTransactions()
             .filter { it.isIncome == isIncome }
             .sortedByDescending { it.date }
     }
 
-    // Get transactions for a date range
     fun getTransactionsByDateRange(startDate: Long, endDate: Long): List<Transaction> {
         return getAllTransactions()
             .filter { it.date in startDate..endDate }
@@ -137,7 +128,6 @@ class TransactionRepository(private val context: Context) {
     }
 
     fun getTotalIncomeForCurrentMonth(): Double {
-        // Get calendar instance from cache or create new one
         val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         calendar.timeInMillis = System.currentTimeMillis()
         val currentMonth = calendar.get(Calendar.MONTH)
@@ -155,7 +145,6 @@ class TransactionRepository(private val context: Context) {
     }
 
     fun getTotalExpenseForCurrentMonth(): Double {
-        // Get calendar instance from cache or create new one
         val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         calendar.timeInMillis = System.currentTimeMillis()
         val currentMonth = calendar.get(Calendar.MONTH)
@@ -172,9 +161,7 @@ class TransactionRepository(private val context: Context) {
             .sumOf { it.amount }
     }
 
-    // Add method to get expense by category for analysis
     fun getExpensesByCategory(): Map<String, Double> {
-        // Get calendar instance from cache or create new one
         val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         calendar.timeInMillis = System.currentTimeMillis()
         val currentMonth = calendar.get(Calendar.MONTH)
@@ -198,7 +185,6 @@ class TransactionRepository(private val context: Context) {
         return expensesByCategory
     }
 
-    // Add new method that accepts date range parameters
     fun getExpensesByCategory(startDate: Long, endDate: Long): Map<String, Double> {
         val expensesByCategory = mutableMapOf<String, Double>()
 
@@ -213,18 +199,15 @@ class TransactionRepository(private val context: Context) {
         return expensesByCategory
     }
 
-    // For getting transactions within a date range
     fun getTransactionsForPeriod(startDate: Long, endDate: Long): List<Transaction> {
         return getAllTransactions()
             .filter { it.date in startDate..endDate }
     }
 
-    // For chart data - weekly
     fun getWeeklyData(numberOfWeeks: Int): List<WeeklyData> {
         val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         val result = mutableListOf<WeeklyData>()
 
-        // Start from current week and go back
         for (i in 0 until numberOfWeeks) {
             if (i > 0) {
                 calendar.add(Calendar.WEEK_OF_YEAR, -1)
@@ -234,12 +217,10 @@ class TransactionRepository(private val context: Context) {
             calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
             val startOfWeek = calendar.timeInMillis
 
-            // Find week label (e.g., "Week 1")
             val weekNumber = calendar.get(Calendar.WEEK_OF_MONTH)
             val monthName = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())
             val weekLabel = "W$weekNumber-$monthName"
 
-            // Calculate income and expense for this week
             var income = 0.0
             var expense = 0.0
 
@@ -254,10 +235,9 @@ class TransactionRepository(private val context: Context) {
             result.add(WeeklyData(weekLabel, income, expense))
         }
 
-        return result.asReversed()  // Return in chronological order
+        return result.asReversed()
     }
 
-    // For chart data - monthly
     fun getMonthlyData(numberOfMonths: Int): List<MonthlyData> {
         val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         val result = mutableListOf<MonthlyData>()
@@ -283,7 +263,6 @@ class TransactionRepository(private val context: Context) {
             calendar.add(Calendar.MILLISECOND, -1)
             val endOfMonth = calendar.timeInMillis
 
-            // Calculate income and expense for this month
             var income = 0.0
             var expense = 0.0
 
@@ -297,48 +276,39 @@ class TransactionRepository(private val context: Context) {
 
             result.add(MonthlyData(monthLabel, income, expense))
 
-            // Reset to beginning of month for next iteration
             calendar.add(Calendar.MILLISECOND, 1)
         }
 
-        return result.asReversed()  // Return in chronological order
+        return result.asReversed()
     }
-    // Overloaded method to get weekly data with custom date range
     fun getWeeklyData(numberOfWeeks: Int, startDate: Long, endDate: Long): List<WeeklyData> {
         val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         calendar.timeInMillis = endDate
         val result = mutableListOf<WeeklyData>()
         val minDate = startDate
 
-        // Start from the end date and go back
         for (i in 0 until numberOfWeeks) {
             if (i > 0) {
                 calendar.add(Calendar.WEEK_OF_YEAR, -1)
             }
 
-            // Calculate current week's end date
             val endOfWeek = calendar.timeInMillis.coerceAtMost(endDate)
 
-            // Set to first day of the week
             calendar.set(Calendar.DAY_OF_WEEK, calendar.firstDayOfWeek)
             var startOfWeek = calendar.timeInMillis
 
-            // If we've gone past the start date, break out of the loop
             if (endOfWeek < minDate) {
                 break
             }
 
-            // Adjust start of week if it's before our minimum date
             if (startOfWeek < minDate) {
                 startOfWeek = minDate
             }
 
-            // Find week label (e.g., "Week 1")
             val weekNumber = calendar.get(Calendar.WEEK_OF_MONTH)
             val monthName = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())
             val weekLabel = "W$weekNumber-$monthName"
 
-            // Calculate income and expense for this week
             var income = 0.0
             var expense = 0.0
 
@@ -353,28 +323,24 @@ class TransactionRepository(private val context: Context) {
             result.add(WeeklyData(weekLabel, income, expense))
         }
 
-        return result.asReversed()  // Return in chronological order
+        return result.asReversed()
     }
 
-    // Overloaded method to get monthly data with custom date range
     fun getMonthlyData(numberOfMonths: Int, startDate: Long, endDate: Long): List<MonthlyData> {
         val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         calendar.timeInMillis = endDate
         val result = mutableListOf<MonthlyData>()
         val minDate = startDate
 
-        // Process months up to the specified number or until we reach minDate
         for (i in 0 until numberOfMonths) {
             if (i > 0) {
                 calendar.add(Calendar.MONTH, -1)
             }
 
-            // Create month label
             val month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) ?: "Unknown"
             val year = calendar.get(Calendar.YEAR)
             val monthLabel = "$month ${year.toString().substring(2)}"
 
-            // Set to first day of the month
             calendar.set(Calendar.DAY_OF_MONTH, 1)
             calendar.set(Calendar.HOUR_OF_DAY, 0)
             calendar.set(Calendar.MINUTE, 0)
@@ -382,21 +348,17 @@ class TransactionRepository(private val context: Context) {
             calendar.set(Calendar.MILLISECOND, 0)
             var startOfMonth = calendar.timeInMillis
 
-            // Move to last day of the month
             calendar.add(Calendar.MONTH, 1)
             calendar.add(Calendar.MILLISECOND, -1)
             var endOfMonth = calendar.timeInMillis
 
-            // If this month is entirely before our minimum date, break
             if (endOfMonth < minDate) {
                 break
             }
 
-            // Adjust period boundaries to respect the overall date range
             if (startOfMonth < minDate) startOfMonth = minDate
             if (endOfMonth > endDate) endOfMonth = endDate
 
-            // Calculate income and expense for this month
             var income = 0.0
             var expense = 0.0
 
@@ -410,15 +372,13 @@ class TransactionRepository(private val context: Context) {
 
             result.add(MonthlyData(monthLabel, income, expense))
 
-            // Reset to beginning of month for next iteration
             calendar.add(Calendar.MILLISECOND, 1)
         }
 
-        return result.asReversed()  // Return in chronological order
+        return result.asReversed()
     }
 
     fun getExpenseForCategory(category: String): Double {
-        // Get calendar instance from cache or create new one
         val calendar = calendarCache.get() ?: Calendar.getInstance().also { calendarCache.set(it) }
         calendar.timeInMillis = System.currentTimeMillis()
         val currentMonth = calendar.get(Calendar.MONTH)
@@ -435,14 +395,13 @@ class TransactionRepository(private val context: Context) {
             .sumOf { it.amount }
     }
 
-    // For file backup/restore (internal storage)
     fun exportToJson(): String {
         return sharedPreferences.getString(KEY_TRANSACTIONS, "[]") ?: "[]"
     }
 
     fun importFromJson(jsonString: String): Boolean {
         return try {
-            JSONArray(jsonString) // Validate JSON format
+            JSONArray(jsonString)
             sharedPreferences.edit().putString(KEY_TRANSACTIONS, jsonString).apply()
             true
         } catch (e: Exception) {
@@ -451,13 +410,17 @@ class TransactionRepository(private val context: Context) {
         }
     }
 
-    // Data classes for analysis
     data class WeeklyData(val week: String, val income: Double, val expense: Double)
     data class MonthlyData(val month: String, val income: Double, val expense: Double)
 
     companion object {
         private const val TRANSACTION_PREFS = "transaction_prefs"
         private const val KEY_TRANSACTIONS = "transactions"
+    }
+
+    fun deleteAllTransactions() {
+        sharedPreferences.edit().remove(KEY_TRANSACTIONS).apply()
+        Log.d("TransactionRepository", "All transactions deleted")
     }
 }
 

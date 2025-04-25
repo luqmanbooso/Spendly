@@ -31,26 +31,21 @@ class OnboardingAdapter(
     override fun getItemCount(): Int = images.size
 
     override fun onBindViewHolder(holder: PagerViewHolder, position: Int) {
-        // Clear any previous text first
         holder.itemTitle.text = ""
         holder.itemDesc.text = ""
 
-        // Then set the new content
         ImageScaler.setResourceSafely(holder.itemView.context, holder.itemImage, images[position])
         holder.itemTitle.text = titles[position]
         holder.itemDesc.text = descriptions[position]
 
-        // Tag the view with its position
         holder.itemView.tag = position
     }
 
-    // Add stable IDs to prevent recycling issues
     override fun getItemId(position: Int): Long {
         return position.toLong()
     }
 
     init {
-        // Enable stable IDs
         setHasStableIds(true)
     }
 }

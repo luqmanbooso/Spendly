@@ -51,8 +51,18 @@ class BudgetActivity : AppCompatActivity() {
             if (intent.getBooleanExtra("ADJUST_BUDGET", false)) {
                 val exceededAmount = intent.getDoubleExtra("EXCEEDED_AMOUNT", 0.0)
                 showBudgetAdjustDialog(exceededAmount)
+            } else if (intent.getBooleanExtra("ADJUST_CATEGORY_BUDGET", false)) {
+                val category = intent.getStringExtra("CATEGORY") ?: return@postDelayed
+                val exceededAmount = intent.getDoubleExtra("EXCEEDED_AMOUNT", 0.0)
+                showCategoryBudgetEditDialog(category)
             }
         }, 300)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setupMonthlyBudget()
+        setupCategoryBudgets()
     }
 
     private fun setupBottomNav() {
@@ -87,63 +97,60 @@ class BudgetActivity : AppCompatActivity() {
             .start()
     }
 
-private fun showBudgetAdjustDialog(exceededAmount: Double) {
-    val dialogView = layoutInflater.inflate(R.layout.dialog_edit_budget, null)
-    val etBudget = dialogView.findViewById<TextInputEditText>(R.id.etBudget)
-    val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
+    private fun showBudgetAdjustDialog(exceededAmount: Double) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_edit_budget, null)
+        val etBudget = dialogView.findViewById<TextInputEditText>(R.id.etBudget)
+        val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
 
-    tvDialogTitle.text = "Adjust Monthly Budget"
+        tvDialogTitle.text = "Adjust Monthly Budget"
 
-    val currentBudget = prefsManager.getMonthlyBudget()
-    val totalExpense = transactionRepository.getTotalExpenseForCurrentMonth()
+        val currentBudget = prefsManager.getMonthlyBudget()
+        val totalExpense = transactionRepository.getTotalExpenseForCurrentMonth()
 
-    // Calculate a suggested new budget (current expense + 10% buffer)
-    val suggestedBudget = Math.ceil(totalExpense * 1.1)
+        val suggestedBudget = Math.ceil(totalExpense * 1.1)
 
-    etBudget.setText(suggestedBudget.toString())
-    etBudget.hint = "Enter amount (min: $totalExpense)"
+        etBudget.setText(suggestedBudget.toString())
+        etBudget.hint = "Enter amount (min: $totalExpense)"
 
-    MaterialAlertDialogBuilder(this)
-        .setView(dialogView)
-        .setTitle("Budget Exceeded")
-        .setMessage("Your expenses exceeded your budget by ${CurrencyFormatter.formatAmount(exceededAmount, prefsManager.getCurrencySymbol())}. Please adjust your budget accordingly.")
-        .setPositiveButton("Adjust Budget") { _, _ ->
-            try {
-                val newBudget = etBudget.text.toString().toDoubleOrNull() ?: 0.0
+        MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .setTitle("Budget Exceeded")
+            .setMessage("Your expenses exceeded your budget by ${CurrencyFormatter.formatAmount(exceededAmount, prefsManager.getCurrencySymbol())}. Please adjust your budget accordingly.")
+            .setPositiveButton("Adjust Budget") { _, _ ->
+                try {
+                    val newBudget = etBudget.text.toString().toDoubleOrNull() ?: 0.0
 
-                if (newBudget >= totalExpense) {
-                    prefsManager.setMonthlyBudget(newBudget)
+                    if (newBudget >= totalExpense) {
+                        prefsManager.setMonthlyBudget(newBudget)
 
-                    binding.layoutBudgetSet.alpha = 0.5f
-                    binding.layoutBudgetSet.animate()
-                        .alpha(1f)
-                        .setDuration(300)
-                        .withEndAction {
-                            setupMonthlyBudget()
-                        }
-                        .start()
+                        binding.layoutBudgetSet.alpha = 0.5f
+                        binding.layoutBudgetSet.animate()
+                            .alpha(1f)
+                            .setDuration(300)
+                            .withEndAction {
+                                setupMonthlyBudget()
+                            }
+                            .start()
 
-                    showSuccessSnackbar("Budget adjusted successfully!")
+                        showSuccessSnackbar("Budget adjusted successfully!")
 
-                    // Check budget status - resets notifications
-                    startService(Intent(this, BudgetCheckService::class.java).apply {
-                        action = BudgetCheckService.ACTION_CHECK_BUDGET
-                    })
-                } else {
-                    Snackbar.make(binding.root,
-                        "Budget must be at least equal to your current expenses",
-                        Snackbar.LENGTH_LONG).show()
+                        startService(Intent(this, BudgetCheckService::class.java).apply {
+                            action = BudgetCheckService.ACTION_CHECK_BUDGET
+                        })
+                    } else {
+                        Snackbar.make(binding.root,
+                            "Budget must be at least equal to your current expenses",
+                            Snackbar.LENGTH_LONG).show()
 
-                    // Show dialog again with error
-                    showBudgetAdjustDialog(exceededAmount)
+                        showBudgetAdjustDialog(exceededAmount)
+                    }
+                } catch (e: Exception) {
+                    Snackbar.make(binding.root, "Invalid budget amount", Snackbar.LENGTH_SHORT).show()
                 }
-            } catch (e: Exception) {
-                Snackbar.make(binding.root, "Invalid budget amount", Snackbar.LENGTH_SHORT).show()
             }
-        }
-        .setNegativeButton("Cancel", null)
-        .show()
-}
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
 
     private fun setupMonthlyBudget() {
         val currencySymbol = prefsManager.getCurrencySymbol()
@@ -243,6 +250,8 @@ private fun showBudgetAdjustDialog(exceededAmount: Double) {
             .setPositiveButton("Delete") { _, _ ->
                 prefsManager.setMonthlyBudget(0.0)
 
+                BackupHelper(this).backupUserData()
+
                 binding.layoutBudgetSet.animate()
                     .alpha(0f)
                     .setDuration(300)
@@ -326,6 +335,8 @@ private fun showBudgetAdjustDialog(exceededAmount: Double) {
                     if (newBudget > 0) {
                         prefsManager.setMonthlyBudget(newBudget)
 
+                        BackupHelper(this).backupUserData()
+
                         binding.layoutNoBudget.animate()
                             .alpha(0f)
                             .setDuration(300)
@@ -372,6 +383,8 @@ private fun showBudgetAdjustDialog(exceededAmount: Double) {
                     if (newBudget > 0) {
                         prefsManager.setMonthlyBudget(newBudget)
 
+                        BackupHelper(this).backupUserData()
+
                         binding.layoutBudgetSet.alpha = 0.5f
                         binding.layoutBudgetSet.animate()
                             .alpha(1f)
@@ -414,31 +427,44 @@ private fun showBudgetAdjustDialog(exceededAmount: Double) {
                 try {
                     val category = spinner.selectedItem.toString()
                     val budget = etBudget.text.toString().toDoubleOrNull() ?: 0.0
+                    val monthlyBudget = prefsManager.getMonthlyBudget()
+                    val currentCategoryBudgets = getCategoryBudgets()
+                    val totalCategoryBudgets = currentCategoryBudgets.sumOf { it.budget }
+                    val newTotal = totalCategoryBudgets + budget
 
                     if (budget > 0) {
-                        prefsManager.setCategoryBudget(category, budget)
+                        if (newTotal <= monthlyBudget) {
+                            prefsManager.setCategoryBudget(category, budget)
 
-                        val isFirstCategoryBudget = binding.layoutEmptyCategoryBudgets.visibility == View.VISIBLE
+                            BackupHelper(this).backupUserData()
 
-                        if (isFirstCategoryBudget) {
-                            binding.layoutEmptyCategoryBudgets.animate()
-                                .alpha(0f)
-                                .setDuration(300)
-                                .withEndAction {
-                                    setupCategoryBudgets()
+                            val isFirstCategoryBudget = binding.layoutEmptyCategoryBudgets.visibility == View.VISIBLE
 
-                                    binding.rvCategoryBudgets.alpha = 0f
-                                    binding.rvCategoryBudgets.animate()
-                                        .alpha(1f)
-                                        .setDuration(300)
-                                        .start()
-                                }
-                                .start()
+                            if (isFirstCategoryBudget) {
+                                binding.layoutEmptyCategoryBudgets.animate()
+                                    .alpha(0f)
+                                    .setDuration(300)
+                                    .withEndAction {
+                                        setupCategoryBudgets()
+
+                                        binding.rvCategoryBudgets.alpha = 0f
+                                        binding.rvCategoryBudgets.animate()
+                                            .alpha(1f)
+                                            .setDuration(300)
+                                            .start()
+                                    }
+                                    .start()
+                            } else {
+                                setupCategoryBudgets()
+                            }
+
+                            showSuccessSnackbar("Category budget added!")
                         } else {
-                            setupCategoryBudgets()
+                            val remaining = monthlyBudget - totalCategoryBudgets
+                            Snackbar.make(binding.root, 
+                                "Total category budgets cannot exceed monthly budget. You can only add up to ${CurrencyFormatter.formatAmount(remaining, prefsManager.getCurrencySymbol())}", 
+                                Snackbar.LENGTH_LONG).show()
                         }
-
-                        showSuccessSnackbar("Category budget added!")
                     } else {
                         Snackbar.make(binding.root, "Please enter a valid amount", Snackbar.LENGTH_SHORT).show()
                     }
@@ -468,10 +494,25 @@ private fun showBudgetAdjustDialog(exceededAmount: Double) {
             .setPositiveButton("Save") { _, _ ->
                 try {
                     val budget = etBudget.text.toString().toDoubleOrNull() ?: 0.0
+                    val monthlyBudget = prefsManager.getMonthlyBudget()
+                    val currentCategoryBudgets = getCategoryBudgets()
+                    val totalCategoryBudgets = currentCategoryBudgets.sumOf { it.budget }
+                    val newTotal = totalCategoryBudgets - currentBudget + budget
+
                     if (budget > 0) {
-                        prefsManager.setCategoryBudget(category, budget)
-                        setupCategoryBudgets()
-                        showSuccessSnackbar("Category budget updated!")
+                        if (newTotal <= monthlyBudget) {
+                            prefsManager.setCategoryBudget(category, budget)
+
+                            BackupHelper(this).backupUserData()
+
+                            setupCategoryBudgets()
+                            showSuccessSnackbar("Category budget updated!")
+                        } else {
+                            val remaining = monthlyBudget - (totalCategoryBudgets - currentBudget)
+                            Snackbar.make(binding.root, 
+                                "Total category budgets cannot exceed monthly budget. You can only set up to ${CurrencyFormatter.formatAmount(remaining, prefsManager.getCurrencySymbol())}", 
+                                Snackbar.LENGTH_LONG).show()
+                        }
                     } else {
                         Snackbar.make(binding.root, "Please enter a valid amount", Snackbar.LENGTH_SHORT).show()
                     }
@@ -492,6 +533,8 @@ private fun showBudgetAdjustDialog(exceededAmount: Double) {
             .setMessage("Are you sure you want to delete the budget for $category?")
             .setPositiveButton("Delete") { _, _ ->
                 prefsManager.setCategoryBudget(category, 0.0)
+
+                BackupHelper(this).backupUserData()
 
                 val remainingBudgets = getCategoryBudgets().size - 1
 
@@ -567,6 +610,7 @@ private fun showBudgetAdjustDialog(exceededAmount: Double) {
     }
 
     override fun onBackPressed() {
+        super.onBackPressed()
         navigateToMainActivity()
     }
 }

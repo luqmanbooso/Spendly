@@ -45,13 +45,12 @@
         <item>AUD</item>
     </string-array>
 
-    <!-- Analysis Activity Strings -->
     <string name="analysis_title">Spending Analysis</string>
     <string name="reports_title">Reports</string>
     <string name="category_breakdown">Category Breakdown</string>
     <string name="top_categories">Top Categories</string>
     <string name="financial_summary">Financial Summary</string>
-    
+
     <string name="net_balance">NET BALANCE</string>
     <string name="export_data">Export Data</string>
     <string name="export_data_description">Export your financial data for the selected period</string>
@@ -60,7 +59,6 @@
     <string name="no_data_message">No data for this period</string>
     <string name="no_data_hint">Try selecting a different time period or add more transactions</string>
 
-    <!-- Budget Activity Strings -->
     <string name="monthly_budget">Monthly Budget</string>
     <string name="edit">Edit</string>
     <string name="no_budget_set">No Budget Set</string>
@@ -75,7 +73,6 @@
     <string name="remaining">Remaining</string>
     <string name="no_budget_status">No budget set</string>
 
-    <!-- Transaction Activity Strings -->
     <string name="transaction_summary">Transaction Summary</string>
     <string name="income">Income</string>
     <string name="expense">Expense</string>
@@ -93,7 +90,6 @@
     <string name="no_transactions_hint">Add your first transaction to start tracking your finances</string>
     <string name="add_transaction">Add Transaction</string>
 
-    <!-- Add Transaction Activity Strings -->
     <string name="transaction_type">Transaction Type</string>
     <string name="amount">Amount</string>
     <string name="amount_hint">0.00</string>
@@ -106,6 +102,5 @@
     <string name="select_category_hint">Select a category</string>
     <string name="save_transaction">Save Transaction</string>
 
-    <!-- Currency Strings -->
     <string name="default_currency_symbol">$</string>
 </resources>

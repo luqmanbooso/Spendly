@@ -7,7 +7,6 @@
     android:background="@color/white"
     tools:context=".OnboardingActivity">
 
-    <!-- Skip Button -->
     <TextView
         android:id="@+id/btnSkip"
         android:layout_width="wrap_content"
@@ -22,7 +21,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- ViewPager2 with fixed constraints -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
@@ -33,7 +31,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnSkip" />
 
-    <!-- Indicator container -->
     <LinearLayout
         android:id="@+id/indicatorContainer"
         android:layout_width="wrap_content"
@@ -46,7 +43,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Continue button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnNext"
         android:layout_width="0dp"

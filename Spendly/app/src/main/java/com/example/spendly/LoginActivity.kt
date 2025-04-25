@@ -27,28 +27,21 @@ class LoginActivity : AppCompatActivity() {
 
         userManager = UserManager(this)
 
-        // Hide action bar
         supportActionBar?.hide()
 
-        // Set up click listeners
         setupClickListeners()
 
-        // Set up form validation
         setupFormValidation()
 
-        // Apply animations
         applyEntryAnimations()
 
-        // Format "Sign Up" text with underline
         val signUpText = SpannableString(binding.tvSignUp.text)
         signUpText.setSpan(UnderlineSpan(), 0, signUpText.length, 0)
         binding.tvSignUp.text = signUpText
 
-        // Check if coming from registration success
         if (intent.getBooleanExtra("REGISTRATION_SUCCESS", false)) {
             showSuccessMessage("Registration successful! Please log in")
 
-            // Pre-fill email if provided
             intent.getStringExtra("EMAIL")?.let {
                 binding.etEmail.setText(it)
                 binding.etPassword.requestFocus()
@@ -57,7 +50,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        // Login button click
         binding.btnLogin.setOnClickListener {
             if (validateForm()) {
                 attemptLogin()
@@ -66,22 +58,18 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        // Sign up text click
         binding.tvSignUp.setOnClickListener {
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
-        // Forgot password click
         binding.tvForgotPassword.setOnClickListener {
             val email = binding.etEmail.text.toString()
             if (email.isNotEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                // Simulate password recovery process
                 binding.btnLogin.isEnabled = false
                 binding.progressBar.visibility = View.VISIBLE
 
-                // Simulate network operation
                 binding.root.postDelayed({
                     binding.progressBar.visibility = View.INVISIBLE
                     binding.btnLogin.isEnabled = true
@@ -94,7 +82,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupFormValidation() {
-        // Email validation
         binding.etEmail.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -104,7 +91,6 @@ class LoginActivity : AppCompatActivity() {
             }
         })
 
-        // Password validation
         binding.etPassword.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -157,26 +143,21 @@ class LoginActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.VISIBLE
         binding.btnLogin.isEnabled = false
 
-        // Simulate network operation
         binding.root.postDelayed({
             binding.progressBar.visibility = View.INVISIBLE
             binding.btnLogin.isEnabled = true
 
             if (userManager.verifyCredentials(email, password)) {
-                // Login successful
                 userManager.setLoggedIn(true)
                 userManager.saveUserEmail(email)
 
-                // Get the username and save it to user_profile SharedPreferences
                 val userName = userManager.getCurrentUserName()
                 if (!userName.isNullOrEmpty()) {
-                    // Save the username to user_profile for MainActivity to find
                     getSharedPreferences("user_profile", MODE_PRIVATE)
                         .edit()
                         .putString("name", userName)
                         .apply()
                 } else {
-                    // If no name found, use email username part
                     val emailUsername = email.substringBefore("@")
                     getSharedPreferences("user_profile", MODE_PRIVATE)
                         .edit()
@@ -184,12 +165,10 @@ class LoginActivity : AppCompatActivity() {
                         .apply()
                 }
 
-                // Launch main activity
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
             } else {
-                // Login failed
                 showErrorMessage("Invalid email or password")
                 binding.tilPassword.error = "Invalid email or password"
                 binding.etPassword.text = null
@@ -215,18 +194,19 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showErrorAnimation() {
         val shake = AnimationUtils.loadAnimation(this, R.anim.shake)
-        binding.loginForm.startAnimation(shake)
+        binding.loginCard.startAnimation(shake)
     }
 
     private fun applyEntryAnimations() {
         val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
         val slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up)
+        val slideUpDelayed = AnimationUtils.loadAnimation(this, R.anim.slide_up_delayed)
 
         binding.appLogo.startAnimation(fadeIn)
         binding.tvWelcomeBack.startAnimation(slideUp)
-        binding.loginForm.startAnimation(slideUp)
+        binding.tvSignInPrompt.startAnimation(slideUp)
+        binding.loginCard.startAnimation(slideUpDelayed)
 
-        // Staggered animation for form elements
         binding.tilEmail.alpha = 0f
         binding.tilPassword.alpha = 0f
         binding.btnLogin.alpha = 0f

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    tools:context=".MainPage">
+
+  <ImageView
+      android:id="@+id/ivAppLogo"
+      android:layout_width="120dp"
+      android:layout_height="120dp"
+      android:layout_marginTop="80dp"
+      android:src="@drawable/ic_launcher"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+      android:id="@+id/tvAppName"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:fontFamily="@font/poppins_bold"
+      android:text="Spendly"
+      android:textColor="@color/white"
+      android:textSize="42sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/ivAppLogo" />
+
+  <TextView
+      android:id="@+id/tvAppTagline"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:fontFamily="@font/poppins_medium"
+      android:text="Your Personal Finance Tracker"
+      android:textColor="@color/accent_yellow"
+      android:textSize="18sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/tvAppName" />
+
+  <View
+      android:id="@+id/divider"
+      android:layout_width="80dp"
+      android:layout_height="3dp"
+      android:layout_marginTop="16dp"
+      android:background="@color/accent_yellow"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/tvAppTagline" />
+
+  <TextView
+      android:id="@+id/tvWelcomeText"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginHorizontal="40dp"
+      android:layout_marginTop="40dp"
+      android:fontFamily="@font/poppins"
+      android:gravity="center"
+      android:text="Take control of your finances with expense tracking, budgeting, and personalized insights"
+      android:textColor="@color/white"
+      android:textSize="16sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+  <LinearLayout
+      android:id="@+id/llFeatures"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="30dp"
+      android:orientation="horizontal"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/tvWelcomeText">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+      <ImageView
+          android:layout_width="50dp"
+          android:layout_height="50dp"
+          android:background="@drawable/circle_background"
+          android:padding="12dp"
+          android:src="@drawable/ic_track"
+          android:tint="@color/primary_dark" />
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:fontFamily="@font/poppins"
+          android:text="Track"
+          android:textColor="@color/text_primary"
+          android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+      <ImageView
+          android:layout_width="50dp"
+          android:layout_height="50dp"
+          android:background="@drawable/circle_background"
+          android:padding="12dp"
+          android:src="@drawable/ic_budget"
+          android:tint="@color/primary_dark" />
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:fontFamily="@font/poppins"
+          android:text="Budget"
+          android:textColor="@color/text_primary"
+          android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+      <ImageView
+          android:layout_width="50dp"
+          android:layout_height="50dp"
+          android:background="@drawable/circle_background"
+          android:padding="12dp"
+          android:src="@drawable/ic_insights"
+          android:tint="@color/primary_dark" />
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:fontFamily="@font/poppins"
+          android:text="Insights"
+          android:textColor="@color/text_primary"
+          android:textSize="14sp" />
+    </LinearLayout>
+  </LinearLayout>
+
+  <com.google.android.material.button.MaterialButton
+      android:id="@+id/btnLogin"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginHorizontal="32dp"
+      android:layout_marginBottom="24dp"
+        android:backgroundTint="@color/primary_dark"
+      android:elevation="4dp"
+        android:fontFamily="@font/poppins_bold"
+      android:paddingVertical="15dp"
+      android:stateListAnimator="@null"
+        android:text="Login"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+      app:cornerRadius="16dp"
+      app:icon="@drawable/ic_login"
+      app:iconGravity="textStart"
+      app:iconPadding="8dp"
+      app:iconTint="@color/white"
+      app:layout_constraintBottom_toTopOf="@+id/btnSignUp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSignUp"
+      android:layout_width="0dp"
+        android:layout_height="wrap_content"
+      android:layout_marginHorizontal="32dp"
+      android:layout_marginBottom="48dp"
+      android:backgroundTint="@android:color/white"
+      android:elevation="4dp"
+        android:fontFamily="@font/poppins_bold"
+      android:paddingVertical="15dp"
+      android:stateListAnimator="@null"
+        android:text="Create Account"
+        android:textAllCaps="false"
+        android:textColor="@color/primary_dark"
+        android:textSize="18sp"
+        app:cornerRadius="16dp"
+      app:icon="@drawable/ic_person_add"
+      app:iconGravity="textStart"
+      app:iconPadding="8dp"
+      app:iconTint="@color/primary_dark"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+        app:strokeColor="@color/primary_dark"
+        app:strokeWidth="2dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

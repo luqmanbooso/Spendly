@@ -1,0 +1,106 @@
+<resources>
+    <string name="app_name">Spendly</string>
+    <string-array name="expense_categories">
+        <item>Food</item>
+        <item>Transport</item>
+        <item>Bills</item>
+        <item>Entertainment</item>
+        <item>Shopping</item>
+        <item>Health</item>
+        <item>Education</item>
+        <item>Housing</item>
+        <item>Personal</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="income_categories">
+        <item>Salary</item>
+        <item>Business</item>
+        <item>Investment</item>
+        <item>Gift</item>
+        <item>Allowance</item>
+        <item>Other</item>
+    </string-array>
+
+
+    <string-array name="currency_entries">
+        <item>US Dollar ($)</item>
+        <item>Euro (€)</item>
+        <item>British Pound (£)</item>
+        <item>Sri Lankan Rupee (Rs)</item>
+        <item>Indian Rupee (₹)</item>
+        <item>Japanese Yen (¥)</item>
+        <item>Canadian Dollar (C$)</item>
+        <item>Australian Dollar (A$)</item>
+    </string-array>
+
+    <string-array name="currency_values">
+        <item>USD</item>
+        <item>EUR</item>
+        <item>GBP</item>
+        <item>LKR</item>
+        <item>INR</item>
+        <item>JPY</item>
+        <item>CAD</item>
+        <item>AUD</item>
+    </string-array>
+
+    <string name="analysis_title">Spending Analysis</string>
+    <string name="reports_title">Reports</string>
+    <string name="category_breakdown">Category Breakdown</string>
+    <string name="top_categories">Top Categories</string>
+    <string name="financial_summary">Financial Summary</string>
+
+    <string name="net_balance">NET BALANCE</string>
+    <string name="export_data">Export Data</string>
+    <string name="export_data_description">Export your financial data for the selected period</string>
+    <string name="export_csv">Export as CSV</string>
+    <string name="export_pdf">Export as PDF</string>
+    <string name="no_data_message">No data for this period</string>
+    <string name="no_data_hint">Try selecting a different time period or add more transactions</string>
+
+    <string name="monthly_budget">Monthly Budget</string>
+    <string name="edit">Edit</string>
+    <string name="no_budget_set">No Budget Set</string>
+    <string name="no_budget_hint">Set up your monthly budget to start tracking your spending</string>
+    <string name="set_budget_now">Set Budget Now</string>
+    <string name="category_budgets">Category Budgets</string>
+    <string name="add">Add</string>
+    <string name="no_category_budgets">No Category Budgets</string>
+    <string name="no_category_budgets_hint">Set budgets for specific spending categories to track more effectively</string>
+    <string name="add_category_budget">Add Category Budget</string>
+    <string name="spent">Spent</string>
+    <string name="remaining">Remaining</string>
+    <string name="no_budget_status">No budget set</string>
+
+    <string name="transaction_summary">Transaction Summary</string>
+    <string name="income">Income</string>
+    <string name="expense">Expense</string>
+    <string name="balance">Balance</string>
+    <string name="show">Show</string>
+    <string name="date_range">Date Range</string>
+    <string name="all">All</string>
+    <string name="by_category">By Category</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="select_category">Select Category</string>
+    <string name="recent_transactions">Recent Transactions</string>
+    <string name="add_new">Add New</string>
+    <string name="no_transactions_yet">No Transactions Yet</string>
+    <string name="no_transactions_hint">Add your first transaction to start tracking your finances</string>
+    <string name="add_transaction">Add Transaction</string>
+
+    <string name="transaction_type">Transaction Type</string>
+    <string name="amount">Amount</string>
+    <string name="amount_hint">0.00</string>
+    <string name="amount_error">Please enter a valid amount</string>
+    <string name="transaction_details">Transaction Details</string>
+    <string name="title">Title</string>
+    <string name="date">Date</string>
+    <string name="category">Category</string>
+    <string name="category_required">Required</string>
+    <string name="select_category_hint">Select a category</string>
+    <string name="save_transaction">Save Transaction</string>
+
+    <string name="default_currency_symbol">$</string>
+</resources>
